@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Confirmation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px 20px;
+        }
+        
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 25px;
+            color: #2c3e50;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title::before {
+            content: "📋";
+            margin-right: 10px;
+            font-size: 24px;
+        }
+        
+        .receipt-section .section-title::before {
+            content: "🎫";
+        }
+        
+        .event-section .section-title::before {
+            content: "🎪";
+        }
+        
+        .prizes-section .section-title::before {
+            content: "🏆";
+        }
+        
+        .organizer-section .section-title::before {
+            content: "🏢";
+        }
+        
+        .team-section .section-title::before {
+            content: "👥";
+        }
+        
+        .rules-section .section-title::before {
+            content: "📜";
+        }
+        
+        .requirements-section .section-title::before {
+            content: "📋";
+        }
+        
+        .payment-section .section-title::before {
+            content: "💳";
+        }
+        
+        .transaction-section .section-title::before {
+            content: "💰";
+        }
+        
+        .notes-section .section-title::before {
+            content: "⚠️";
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 16px;
+            color: #2c3e50;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .status-paid {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .prize-item {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .prize-item h4 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .prize-item p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .team-card {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .team-card h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .rules-content, .requirements-content {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+            margin-top: 10px;
+        }
+        
+        .transaction-details {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .transaction-details h4 {
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .transaction-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .notes-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .notes-list li {
+            background: white;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+            position: relative;
+        }
+        
+        .notes-list li::before {
+            content: "✓";
+            position: absolute;
+            left: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #667eea;
+            color: white;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        
+        .footer h3 {
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+        
+        .footer p {
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+        
+        .contact-info {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #34495e;
+        }
+        
+        .contact-info p {
+            margin-bottom: 5px;
+        }
+        
+        @media (max-width: 600px) {
+            .info-grid, .transaction-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .content {
+                padding: 20px 15px;
+            }
+            
+            .header {
+                padding: 20px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>🎉 Registration Confirmed!</h1>
+            <p>Thank you for registering for our event</p>
+        </div>
+        
+        <div class="content">
+            <div class="greeting">
+                Dear <strong th:text="${studentName}">Student Name</strong>,
+                <br>
+                Thank you for registering for the event! We're excited to have you join us.
+            </div>
+            
+            <!-- Registration Receipt Section -->
+            <div class="section receipt-section">
+                <h2 class="section-title">Registration Receipt</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Receipt Number</span>
+                        <span class="info-value" th:text="${receiptNumber}">RCP123456789</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Registration Date</span>
+                        <span class="info-value" th:text="${registrationDate}">2024-01-15</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Registration Type</span>
+                        <span class="info-value" th:text="${registrationType}">SOLO</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Event Details Section -->
+            <div class="section event-section">
+                <h2 class="section-title">Event Details</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Event Name</span>
+                        <span class="info-value" th:text="${eventName}">Tech Fest 2024</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Event Date</span>
+                        <span class="info-value" th:text="${eventDate}">2024-02-15</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Location</span>
+                        <span class="info-value" th:text="${eventLocation}">Main Auditorium</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Category</span>
+                        <span class="info-value" th:text="${eventCategory}">Technical</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Mode</span>
+                        <span class="info-value" th:text="${eventMode}">Offline</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Entry Fee</span>
+                        <span class="info-value">₹<span th:text="${eventFees}">500</span></span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Prizes Section -->
+            <div class="section prizes-section" th:if="${hasPrizes}">
+                <h2 class="section-title">Prizes</h2>
+                <div class="prize-item" th:if="${cashPrize}">
+                    <h4>🏆 Cash Prize</h4>
+                    <p th:text="${cashPrize}">₹50,000</p>
+                </div>
+                <div class="prize-item" th:if="${firstPrize}">
+                    <h4>🥇 1st Prize</h4>
+                    <p th:text="${firstPrize}">₹25,000</p>
+                </div>
+                <div class="prize-item" th:if="${secondPrize}">
+                    <h4>🥈 2nd Prize</h4>
+                    <p th:text="${secondPrize}">₹15,000</p>
+                </div>
+                <div class="prize-item" th:if="${thirdPrize}">
+                    <h4>🥉 3rd Prize</h4>
+                    <p th:text="${thirdPrize}">₹10,000</p>
+                </div>
+            </div>
+            
+            <!-- Organizer Details Section -->
+            <div class="section organizer-section">
+                <h2 class="section-title">Organizer Details</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">College</span>
+                        <span class="info-value" th:text="${collegeName}">ABC University</span>
+                    </div>
+                    <div class="info-item" th:if="${festName}">
+                        <span class="info-label">Fest</span>
+                        <span class="info-value" th:text="${festName}">Tech Fest 2024</span>
+                    </div>
+                    <div class="info-item" th:if="${organizerName}">
+                        <span class="info-label">Organizer</span>
+                        <span class="info-value" th:text="${organizerName}">John Doe</span>
+                    </div>
+                    <div class="info-item" th:if="${organizerEmail}">
+                        <span class="info-label">Organizer Email</span>
+                        <span class="info-value" th:text="${organizerEmail}">organizer@college.edu</span>
+                    </div>
+                    <div class="info-item" th:if="${organizerPhone}">
+                        <span class="info-label">Organizer Phone</span>
+                        <span class="info-value" th:text="${organizerPhone}">+91-9876543210</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Team Details Section -->
+            <div class="section team-section" th:if="${isTeamRegistration}">
+                <h2 class="section-title">Team Details</h2>
+                <div class="team-card">
+                    <h4>Team Name: <span th:text="${teamName}">Team Alpha</span></h4>
+                    <p>Team Creator: <span th:text="${teamCreator}">John Doe</span></p>
+                </div>
+            </div>
+            
+            <!-- Event Rules Section -->
+            <div class="section rules-section" th:if="${eventRules}">
+                <h2 class="section-title">Event Rules</h2>
+                <div class="rules-content" th:text="${eventRules}">
+                    Event rules and guidelines will be displayed here.
+                </div>
+            </div>
+            
+            <!-- Event Requirements Section -->
+            <div class="section requirements-section" th:if="${eventRequirements}">
+                <h2 class="section-title">Event Requirements</h2>
+                <div class="requirements-content" th:text="${eventRequirements}">
+                    Event requirements and prerequisites will be displayed here.
+                </div>
+            </div>
+            
+            <!-- Payment Status Section -->
+            <div class="section payment-section">
+                <h2 class="section-title">Payment Status</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Status</span>
+                        <span class="status-badge" th:class="${paymentStatus == 'paid' ? 'status-paid' : 'status-pending'}" th:text="${paymentStatus}">PENDING</span>
+                    </div>
+                </div>
+                <p th:if="${paymentStatus == 'pending' && eventFees > 0}" style="margin-top: 15px; color: #856404; background: #fff3cd; padding: 10px; border-radius: 6px;">
+                    ⚠️ Please complete your payment to confirm your registration.
+                </p>
+            </div>
+            
+            <!-- Payment Transaction Details Section -->
+            <div class="section transaction-section" th:if="${hasPaymentDetails}">
+                <h2 class="section-title">Payment Transaction Details</h2>
+                <div class="transaction-details">
+                    <div class="transaction-grid">
+                        <div class="info-item">
+                            <span class="info-label">Order ID</span>
+                            <span class="info-value" th:text="${orderId}">order_123456</span>
+                        </div>
+                        <div class="info-item" th:if="${transactionId}">
+                            <span class="info-label">Transaction ID</span>
+                            <span class="info-value" th:text="${transactionId}">pay_123456</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Amount</span>
+                            <span class="info-value">₹<span th:text="${paymentAmount}">500</span></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Currency</span>
+                            <span class="info-value" th:text="${paymentCurrency}">INR</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Payment Date</span>
+                            <span class="info-value" th:text="${paymentDate}">2024-01-15</span>
+                        </div>
+                        <div class="info-item" th:if="${paymentDescription}">
+                            <span class="info-label">Description</span>
+                            <span class="info-value" th:text="${paymentDescription}">Event Registration</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Important Notes Section -->
+            <div class="section notes-section">
+                <h2 class="section-title">Important Notes</h2>
+                <ul class="notes-list">
+                    <li>Please arrive 15 minutes before the event start time</li>
+                    <li>Bring your college ID card for verification</li>
+                    <li>Check your email for any updates or changes</li>
+                    <li>Contact the organizer if you have any questions</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <h3>We look forward to seeing you at the event!</h3>
+            <p>Best regards,</p>
+            <p><strong>Unbound Platform Team</strong></p>
+            
+            <div class="contact-info">
+                <p>📧 Email: support@unbound.com</p>
+                <p>📞 Phone: +91-XXXXXXXXXX</p>
+                <p>🌐 Website: www.unbound.com</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
