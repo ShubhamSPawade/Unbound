@@ -10,6 +10,21 @@ assignees: ''
 <!-- A clear and concise description of the bug -->
 
 
+## Module Affected
+<!-- Select the affected module -->
+- [ ] Backend (Spring Boot)
+- [ ] Frontend (React)
+- [ ] Database (PostgreSQL)
+- [ ] API
+- [ ] Deployment
+
+## Milestone
+<!-- Which milestone does this relate to? -->
+- [ ] Backend Core Development
+- [ ] Frontend Development
+- [ ] Feature Completion & Payment Integration
+- [ ] Testing Optimization & Deployment
+
 ## Steps to Reproduce
 1. 
 2. 
@@ -23,8 +38,8 @@ assignees: ''
 <!-- What actually happens -->
 
 
-## Screenshots (if applicable)
-<!-- Add screenshots to help explain the problem -->
+## Screenshots / Logs
+<!-- Add screenshots or error logs -->
 
 ## Environment
 - **Branch**: 

@@ -10,6 +10,23 @@ assignees: ''
 <!-- A clear description of the feature -->
 
 
+## Module
+<!-- Which module does this feature belong to? -->
+- [ ] Backend (Spring Boot)
+- [ ] Frontend (React)
+- [ ] Database (PostgreSQL)
+- [ ] API
+- [ ] Deployment
+- [ ] Documentation
+
+## Milestone
+<!-- Which milestone does this belong to? -->
+- [ ] Requirement Analysis & System Design
+- [ ] Backend Core Development
+- [ ] Frontend Development
+- [ ] Feature Completion & Payment Integration
+- [ ] Testing Optimization & Deployment
+
 ## Problem it Solves
 <!-- What problem does this feature address? -->
 
@@ -22,10 +39,6 @@ assignees: ''
 - [ ] 
 - [ ] 
 - [ ] 
-
-## Milestone
-<!-- Which milestone does this belong to? -->
-
 
 ## Additional Context
 <!-- Mockups, references, or any other context -->
