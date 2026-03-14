@@ -538,9 +538,3 @@ Mobile structure:
 - Typography and color styles complete
 - Mobile responsive variants complete
 - Empty/loading/error states complete
-
-## 14. Figma / FigJam Assets
-- Unbound Design System (Neo-brutalism): https://www.figma.com/online-whiteboard/create-diagram/7a2f18f9-5e41-487b-bc3f-3864315ada97?utm_source=other&utm_content=edit_in_figjam&oai_id=&request_id=38c0078c-2d41-4394-8656-84c640497967
-- Unbound Wireframes - Public + Student: https://www.figma.com/online-whiteboard/create-diagram/318fcd2c-dafb-4821-b8a8-184fc50be747?utm_source=other&utm_content=edit_in_figjam&oai_id=&request_id=034c88be-c295-484d-8180-27c90520fed3
-- Unbound Wireframes - College, Club, Super Admin: https://www.figma.com/online-whiteboard/create-diagram/9a5965f3-d496-40fc-aa6f-5ba39476054a?utm_source=other&utm_content=edit_in_figjam&oai_id=&request_id=5c74a4ac-a258-4c68-b769-b01e35bf4e37
-- Unbound Implementation Handoff Flow: https://www.figma.com/online-whiteboard/create-diagram/f84844a8-5b75-46e6-8139-a642ffbd9e06?utm_source=other&utm_content=edit_in_figjam&oai_id=&request_id=2014f7eb-5fe8-41ea-9e67-e4cb34fba1f4
