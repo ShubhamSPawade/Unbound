@@ -138,7 +138,7 @@ PostgreSQL is selected because the **Fest → Club → Event → Registration** 
 ## Resources Needed
 
 - **Infrastructure:** Cloud compute (2–4 vCPUs, Linux, 8GB RAM, 20GB disk), managed database, cloud storage, SSL-enabled domain, email service  
-- **Development Tools:** GitHub, Jira, Maven, Postman  
+- **Development Tools:** GitHub, Maven, Postman  
 - **Security Tools:** JWT, Spring Security, BCrypt  
 
 ---
