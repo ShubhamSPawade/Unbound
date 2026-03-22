@@ -8,7 +8,7 @@ public class BackendApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(BackendApplication.class, args);
-		system.out.println("Unbound Strted !!! ");
+		System.out.println("Unbound Backend is Running!");
 	}
 
 }
