@@ -98,36 +98,38 @@ This reduces repetitive setup work.
 
 ---
 
-# Technological Requirements
+## Technological Requirements
 
 | Component | Selected Technology | Primary Reason |
-|----------|----------------------|----------------|
-| Frontend | React | Component-based reusable UI |
-| Backend | Java with Spring Boot | Enterprise-grade security and concurrency |
-| Database | PostgreSQL | Strict relational integrity |
+|-----------|----------------------|----------------|
+| Frontend | React + Tailwind CSS + shadcn/ui | Component-based scalable UI with utility-first styling and reusable accessible components |
+| Backend | Java with Spring Boot | Enterprise-grade security, strong multi-threading, and scalable API development |
+| Database | PostgreSQL | Strong relational integrity with JSONB support for flexible event metadata |
 
 ---
 
-# Frontend Framework Comparison
+## Frontend Framework Comparison
 
 | Feature | React (Chosen) | Angular | Vue.js |
-|--------|----------------|---------|--------|
+|---------|----------------|---------|--------|
 | Learning Curve | Moderate | High | Low |
-| Performance | High (Virtual DOM) | High | High |
-| Ecosystem | Massive | Rigid | Smaller |
+| Performance | High (Virtual DOM) | High (Real DOM) | High (Virtual DOM) |
+| Ecosystem | Tailwind CSS + shadcn/ui | Full-featured but rigid | Smaller than React |
+| Decision | React | Not Selected | Not Selected |
 
 ---
 
-# Database Comparison
+## Database: Why PostgreSQL?
 
-| Feature | PostgreSQL | MySQL | MongoDB |
-|--------|------------|-------|---------|
-| Data Model | Relational | Relational | Document |
-| Joins | Excellent | Good | Poor |
-| ACID | Full | Full | Partial |
-| Scalability | Vertical + Horizontal | Vertical | Horizontal |
+| Feature | PostgreSQL (Selected) | MySQL | MongoDB |
+|---------|------------------------|-------|---------|
+| Data Model | Relational (Strict) | Relational (Strict) | Document (Flexible) |
+| Joins | Excellent for nested relationships | Good | Limited relational capability |
+| ACID Compliance | Full | Full | Document-level only |
+| Scalability | Vertical + Horizontal | Mostly Vertical | Horizontal |
+| Nested Logic | JSONB support | Limited JSON support | Native JSON |
 
-PostgreSQL is selected because the Fest → Club → Event model is inherently relational.
+PostgreSQL is selected because the **Fest → Club → Event → Registration** relationship is inherently relational and requires strict consistency.
 
 ---
 
