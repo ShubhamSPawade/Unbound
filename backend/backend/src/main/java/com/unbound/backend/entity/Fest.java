@@ -26,6 +26,8 @@ public class Fest {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    private String bannerUrl;
+
     @Column(nullable = false)
     private LocalDate startDate;
 
