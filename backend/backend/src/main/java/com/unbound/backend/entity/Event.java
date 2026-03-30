@@ -48,7 +48,7 @@ public class Event {
     private EventStatus status = EventStatus.DRAFT;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fest_id", nullable = false)
+    @JoinColumn(name = "fest_id")
     private Fest fest;
 
     @ManyToOne(fetch = FetchType.LAZY)
