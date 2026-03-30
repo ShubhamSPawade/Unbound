@@ -28,6 +28,8 @@ public class Event {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    private String bannerUrl;
+
     private String venue;
 
     @Column(nullable = false)
