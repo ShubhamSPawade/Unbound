@@ -4,16 +4,19 @@ import com.unbound.backend.dto.request.EventRequest;
 import com.unbound.backend.dto.response.ApiResponse;
 import com.unbound.backend.dto.response.EventResponse;
 import com.unbound.backend.service.EventService;
+import com.unbound.backend.enums.EventCategory;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -66,9 +69,15 @@ public class EventController {
 
     // Any authenticated user
     @GetMapping
-    @Operation(summary = "Get all published events")
-    public ResponseEntity<ApiResponse<List<EventResponse>>> getAllPublishedEvents() {
-        return ResponseEntity.ok(ApiResponse.success("Events fetched", eventService.getAllPublishedEvents()));
+    @Operation(summary = "Get all published events with optional filters")
+    public ResponseEntity<ApiResponse<List<EventResponse>>> getAllPublishedEvents(
+            @RequestParam(required = false) EventCategory category,
+            @RequestParam(required = false) Long clubId,
+            @RequestParam(required = false) Long festId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to) {
+        return ResponseEntity.ok(ApiResponse.success("Events fetched",
+                eventService.getAllPublishedEvents(category, clubId, festId, from, to)));
     }
 
     @GetMapping("/admin/all")
