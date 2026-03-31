@@ -28,6 +28,8 @@ public class Event {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    private String bannerUrl;
+
     private String venue;
 
     @Column(nullable = false)
@@ -46,7 +48,7 @@ public class Event {
     private EventStatus status = EventStatus.DRAFT;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fest_id", nullable = false)
+    @JoinColumn(name = "fest_id")
     private Fest fest;
 
     @ManyToOne(fetch = FetchType.LAZY)
