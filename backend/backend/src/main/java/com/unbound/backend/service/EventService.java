@@ -5,6 +5,7 @@ import com.unbound.backend.dto.response.EventResponse;
 import com.unbound.backend.entity.Club;
 import com.unbound.backend.entity.Event;
 import com.unbound.backend.entity.Fest;
+import com.unbound.backend.enums.EventCategory;
 import com.unbound.backend.enums.EventStatus;
 import com.unbound.backend.exception.BadRequestException;
 import com.unbound.backend.exception.ResourceNotFoundException;
@@ -15,6 +16,7 @@ import com.unbound.backend.repository.RegistrationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -80,9 +82,10 @@ public class EventService {
         return toResponse(eventRepository.save(event));
     }
 
-    // GET /api/events
-    public List<EventResponse> getAllPublishedEvents() {
-        return eventRepository.findAllByStatus(EventStatus.PUBLISHED)
+    // GET /api/events with optional filters
+    public List<EventResponse> getAllPublishedEvents(EventCategory category, Long clubId, Long festId,
+                                                      LocalDateTime from, LocalDateTime to) {
+        return eventRepository.filterPublishedEvents(category, clubId, festId, from, to)
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
 

@@ -1,24 +1,56 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+# ── Dependencies ──────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
 
-node_modules
-dist
-dist-ssr
-*.local
+# ── Next.js ───────────────────────────────────────────────
+.next/
+out/
+build/
+dist/
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# ── Environment variables ─────────────────────────────────
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# ── Package managers ──────────────────────────────────────
+# Keep pnpm-lock.yaml, ignore npm/yarn lockfiles
+package-lock.json
+yarn.lock
+.yarn/
+.pnpm-store/
+
+# ── OS files ──────────────────────────────────────────────
 .DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Editor / IDE ──────────────────────────────────────────
+.vscode/
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# ── Logs ──────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ── Testing ───────────────────────────────────────────────
+coverage/
+.nyc_output/
+
+# ── Misc ──────────────────────────────────────────────────
+*.tsbuildinfo
+next-env.d.ts
+.vercel/
+ROUTES.md

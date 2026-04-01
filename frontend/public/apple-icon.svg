@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" fill="none">
+  <rect width="180" height="180" fill="#4ade80"/>
+  <rect x="4" y="4" width="172" height="172" fill="none" stroke="#111" stroke-width="8"/>
+  <!-- Infinity symbol -->
+  <path
+    d="M30 90 C30 68 46 52 64 52 C76 52 85 59 90 70 C95 59 104 52 116 52 C134 52 150 68 150 90 C150 112 134 128 116 128 C104 128 95 121 90 110 C85 121 76 128 64 128 C46 128 30 112 30 90 Z"
+    stroke="#111"
+    stroke-width="12"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"
+  />
+</svg>

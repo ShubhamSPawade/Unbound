@@ -13,7 +13,7 @@ assignees: ''
 ## Module Affected
 <!-- Select the affected module -->
 - [ ] Backend (Spring Boot)
-- [ ] Frontend (React)
+- [ ] Frontend (Next.js 16)
 - [ ] Database (PostgreSQL)
 - [ ] API
 - [ ] Deployment

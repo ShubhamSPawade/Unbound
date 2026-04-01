@@ -17,7 +17,7 @@ Closes #
 ## Module
 <!-- Which area of the project does this affect? -->
 - [ ] Backend (Spring Boot)
-- [ ] Frontend (React)
+- [ ] Frontend (Next.js 16)
 - [ ] Database (PostgreSQL)
 - [ ] API
 - [ ] Testing
