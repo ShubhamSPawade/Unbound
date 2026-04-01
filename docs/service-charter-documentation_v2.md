@@ -104,7 +104,7 @@ Reduces repetitive setup effort and improves consistency across semesters.
 
 | Component | Selected Technology | Primary Reason |
 |-----------|----------------------|----------------|
-| Frontend | Next.js 16 + React 19 + Tailwind CSS + shadcn/ui | Server-side rendering, App Router, React Server Components, and production-ready framework with optimal performance |
+| Frontend | Next.js 16 + Tailwind CSS + shadcn/ui | Server-side rendering, App Router, React Server Components, and production-ready framework with optimal performance |
 | Backend | Java with Spring Boot | Enterprise-grade security, strong multi-threading, and scalable API development |
 | Database | PostgreSQL | Strong relational integrity with JSONB support for flexible event metadata |
 
@@ -116,9 +116,9 @@ Reduces repetitive setup effort and improves consistency across semesters.
 |---------|---------------------|---------|---------------|
 | Learning Curve | Moderate | High | Low |
 | Performance | Excellent (SSR + RSC + App Router) | High (Real DOM) | High (SSR) |
-| Ecosystem | React 19 + Tailwind CSS + shadcn/ui | Full-featured but rigid | Smaller ecosystem |
+| Ecosystem | Tailwind CSS + shadcn/ui | Full-featured but rigid | Smaller ecosystem |
 | Built-in Features | Routing, API routes, Image optimization, SSR/SSG | Requires additional setup | Good but less mature |
-| Decision | Next.js 16 with React 19 | Not Selected | Not Selected |
+| Decision | Next.js 16 | Not Selected | Not Selected |
 
 ---
 

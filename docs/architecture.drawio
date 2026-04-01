@@ -7,7 +7,7 @@
         <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=22;fontStyle=1;fontColor=#1a1a2e;" value="Unbound — Event Management Platform | System Architecture" vertex="1">
           <mxGeometry height="38" width="2200" x="200" y="15" as="geometry" />
         </mxCell>
-        <mxCell id="arch-tag" parent="1" style="text;html=1;strokeColor=#1565c0;fillColor=#e3f2fd;align=center;fontSize=11;fontStyle=1;fontColor=#1565c0;rounded=1;" value="Stack: Next.js 16 + React 19 | Spring Boot 3 · Java 17 | PostgreSQL | JWT Auth | Architecture: Modular Monolith | Future: Microservices" vertex="1">
+        <mxCell id="arch-tag" parent="1" style="text;html=1;strokeColor=#1565c0;fillColor=#e3f2fd;align=center;fontSize=11;fontStyle=1;fontColor=#1565c0;rounded=1;" value="Stack: Next.js 16 | Spring Boot 3 · Java 17 | PostgreSQL | JWT Auth | Architecture: Modular Monolith | Future: Microservices" vertex="1">
           <mxGeometry height="26" width="2200" x="200" y="58" as="geometry" />
         </mxCell>
         <mxCell id="flow" parent="1" style="text;html=1;strokeColor=#b71c1c;fillColor=#b71c1c;align=center;fontSize=12;fontStyle=1;fontColor=#ffffff;rounded=1;" value="MAIN FLOW: User → Next.js Frontend → Axios (Bearer JWT) → JWT Filter → Controller → Service → Repository → PostgreSQL" vertex="1">
@@ -19,7 +19,7 @@
         <mxCell id="browser" parent="client-bg" style="rounded=1;whiteSpace=wrap;fillColor=#bbdefb;strokeColor=#1976D2;fontSize=12;fontStyle=1;" value="Web Browser" vertex="1">
           <mxGeometry height="40" width="220" x="25" y="48" as="geometry" />
         </mxCell>
-        <mxCell id="fe-bg" parent="client-bg" style="swimlane;startSize=28;fillColor=#fff9c4;strokeColor=#f9a825;fontStyle=1;fontSize=11;rounded=1;strokeWidth=2;" value="Frontend (Next.js 16 + React 19)" vertex="1">
+        <mxCell id="fe-bg" parent="client-bg" style="swimlane;startSize=28;fillColor=#fff9c4;strokeColor=#f9a825;fontStyle=1;fontSize=11;rounded=1;strokeWidth=2;" value="Frontend (Next.js 16)" vertex="1">
           <mxGeometry height="586" width="246" x="12" y="136" as="geometry" />
         </mxCell>
         <mxCell id="pg-home" parent="fe-bg" style="rounded=1;whiteSpace=wrap;fillColor=#fff9c4;strokeColor=#f9a825;fontSize=12;" value="Home Page" vertex="1">
