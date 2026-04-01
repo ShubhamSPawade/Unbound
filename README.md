@@ -312,11 +312,10 @@ This project is licensed under the MIT License.
 
 ## Team
 
-- [Khushboo Meshram](https://github.com/khushboormeshram)
-- [Prasad Ingole](https://github.com/IngolePrasad777)
-- [Shubham Pawade](https://github.com/ShubhamSPawade)
-- [Pratik Bhosale](https://github.com/PratikPBhosale)
-- [Samiksha Mulik](https://github.com/samikshamulik)
+<a href="https://github.com/ShubhamSPawade/Unbound/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=ShubhamSPawade/Unbound" />
+</a>
+
 
 ## Call to Action
 
