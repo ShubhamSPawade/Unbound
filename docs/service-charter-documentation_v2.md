@@ -104,7 +104,7 @@ Reduces repetitive setup effort and improves consistency across semesters.
 
 | Component | Selected Technology | Primary Reason |
 |-----------|----------------------|----------------|
-| Frontend | React + Tailwind CSS + shadcn/ui | Component-based scalable UI with utility-first styling and reusable accessible components |
+| Frontend | Next.js 16 + React 19 + Tailwind CSS + shadcn/ui | Server-side rendering, App Router, React Server Components, and production-ready framework with optimal performance |
 | Backend | Java with Spring Boot | Enterprise-grade security, strong multi-threading, and scalable API development |
 | Database | PostgreSQL | Strong relational integrity with JSONB support for flexible event metadata |
 
@@ -112,12 +112,13 @@ Reduces repetitive setup effort and improves consistency across semesters.
 
 ## Frontend Framework Comparison
 
-| Feature | React (Chosen) | Angular | Vue.js |
-|---------|----------------|---------|--------|
+| Feature | Next.js 16 (Chosen) | Angular | Vue.js / Nuxt |
+|---------|---------------------|---------|---------------|
 | Learning Curve | Moderate | High | Low |
-| Performance | High (Virtual DOM) | High (Real DOM) | High (Virtual DOM) |
-| Ecosystem | Tailwind CSS + shadcn/ui | Full-featured but rigid | Smaller than React |
-| Decision | React | Not Selected | Not Selected |
+| Performance | Excellent (SSR + RSC + App Router) | High (Real DOM) | High (SSR) |
+| Ecosystem | React 19 + Tailwind CSS + shadcn/ui | Full-featured but rigid | Smaller ecosystem |
+| Built-in Features | Routing, API routes, Image optimization, SSR/SSG | Requires additional setup | Good but less mature |
+| Decision | Next.js 16 with React 19 | Not Selected | Not Selected |
 
 ---
 
