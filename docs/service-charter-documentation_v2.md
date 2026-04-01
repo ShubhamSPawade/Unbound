@@ -102,7 +102,7 @@ This reduces repetitive setup work.
 
 | Component | Selected Technology | Primary Reason |
 |-----------|----------------------|----------------|
-| Frontend | React + Tailwind CSS + shadcn/ui | Component-based scalable UI with utility-first styling and reusable accessible components |
+| Frontend | Next.js + Tailwind CSS + shadcn/ui | Component-based scalable UI with utility-first styling and reusable accessible components |
 | Backend | Java with Spring Boot | Enterprise-grade security, strong multi-threading, and scalable API development |
 | Database | PostgreSQL | Strong relational integrity with JSONB support for flexible event metadata |
 
@@ -110,12 +110,12 @@ This reduces repetitive setup work.
 
 ## Frontend Framework Comparison
 
-| Feature | React (Chosen) | Angular | Vue.js |
+| Feature | Next.js (Chosen) | Angular | Vue.js |
 |---------|----------------|---------|--------|
 | Learning Curve | Moderate | High | Low |
 | Performance | High (Virtual DOM) | High (Real DOM) | High (Virtual DOM) |
 | Ecosystem | Tailwind CSS + shadcn/ui | Full-featured but rigid | Smaller than React |
-| Decision | React | Not Selected | Not Selected |
+| Decision | Next.js | Not Selected | Not Selected |
 
 ---
 
@@ -253,8 +253,8 @@ https://docs.google.com/spreadsheets/d/1PWZpNunfXjQh3dDIHBo_Y4v-_pOvMltn0CBHHJmt
 ## 3.0 Frontend Development
 
 ### 3.1 Frontend Setup
-- React setup  
-- React Router  
+- Next.js setup  
+- Next.js Router  
 
 ### 3.2 Student Module
 - Dashboard  
