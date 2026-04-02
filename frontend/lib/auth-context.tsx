@@ -1,6 +1,18 @@
 "use client"
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react"
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react"
+
+const AUTH_STORAGE_KEY = "unbound_auth_user"
+const AUTH_COOKIE_NAME = "unbound_auth_role"
+
+function setAuthCookie(role: string) {
+  const secure = location.protocol === "https:" ? "; Secure" : ""
+  document.cookie = `${AUTH_COOKIE_NAME}=${role}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax${secure}`
+}
+
+function clearAuthCookie() {
+  document.cookie = `${AUTH_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`
+}
 
 export type UserRole = "student" | "club" | "admin" | "superadmin"
 
@@ -85,7 +97,29 @@ const mockUsers: Record<string, User & { password: string }> = {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Rehydrate from localStorage on first mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(AUTH_STORAGE_KEY)
+      if (stored) {
+        const parsed: User = JSON.parse(stored)
+        setUser(parsed)
+        setAuthCookie(parsed.role)
+      }
+    } catch (err) {
+      console.warn("[AuthProvider] Failed to restore session from localStorage:", err)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  const persistUser = useCallback((userData: User) => {
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData))
+    setAuthCookie(userData.role)
+    setUser(userData)
+  }, [])
 
   const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true)
@@ -93,13 +127,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const mockUser = mockUsers[email]
     if (mockUser && mockUser.password === password) {
       const { password: _, ...userData } = mockUser
-      setUser(userData)
+      persistUser(userData)
       setIsLoading(false)
       return
     }
     setIsLoading(false)
     throw new Error("Invalid email or password")
-  }, [])
+  }, [persistUser])
 
   const signup = useCallback(async (data: SignupData) => {
     setIsLoading(true)
@@ -114,18 +148,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       year: data.year,
       clubName: data.clubName,
     }
-    setUser(newUser)
+    persistUser(newUser)
     setIsLoading(false)
-  }, [])
+  }, [persistUser])
 
   const logout = useCallback(() => {
+    localStorage.removeItem(AUTH_STORAGE_KEY)
+    clearAuthCookie()
     setUser(null)
   }, [])
 
   const updateProfile = useCallback(async (data: Partial<User>) => {
     setIsLoading(true)
     await new Promise((resolve) => setTimeout(resolve, 500))
-    setUser((prev) => (prev ? { ...prev, ...data } : null))
+    setUser((prev) => {
+      if (!prev) return null
+      const updated = { ...prev, ...data }
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updated))
+      return updated
+    })
     setIsLoading(false)
   }, [])
 
