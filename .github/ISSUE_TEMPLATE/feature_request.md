@@ -13,7 +13,7 @@ assignees: ''
 ## Module
 <!-- Which module does this feature belong to? -->
 - [ ] Backend (Spring Boot)
-- [ ] Frontend (React)
+- [ ] Frontend (Next.js 16)
 - [ ] Database (PostgreSQL)
 - [ ] API
 - [ ] Deployment
