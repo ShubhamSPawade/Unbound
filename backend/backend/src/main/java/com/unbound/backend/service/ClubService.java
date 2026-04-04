@@ -10,8 +10,10 @@ import com.unbound.backend.enums.Role;
 import com.unbound.backend.exception.BadRequestException;
 import com.unbound.backend.exception.ResourceNotFoundException;
 import com.unbound.backend.repository.ClubRepository;
+import com.unbound.backend.service.EmailService;
 import com.unbound.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,10 +21,12 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ClubService {
 
     private final ClubRepository clubRepository;
     private final UserService userService;
+    private final EmailService emailService;
 
     // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -133,7 +137,16 @@ public class ClubService {
         }
         club.setStatus(ClubStatus.APPROVED);
         club.setRejectionReason(null);
-        return toResponse(clubRepository.save(club));
+        Club updatedClub = clubRepository.save(club);
+        try {
+            emailService.sendClubApprovalNotification(
+                    updatedClub.getCreatedBy().getEmail(),
+                    updatedClub.getCreatedBy().getName(),
+                    updatedClub.getName());
+        } catch (Exception ex) {
+            log.warn("Club approval email failed for club {}", updatedClub.getId(), ex);
+        }
+        return toResponse(updatedClub);
     }
 
     public ClubResponse rejectClub(Long id, ClubStatusRequest request) {
@@ -146,7 +159,17 @@ public class ClubService {
         }
         club.setStatus(ClubStatus.REJECTED);
         club.setRejectionReason(request.getRejectionReason());
-        return toResponse(clubRepository.save(club));
+        Club updatedClub = clubRepository.save(club);
+        try {
+            emailService.sendClubRejectionNotification(
+                    updatedClub.getCreatedBy().getEmail(),
+                    updatedClub.getCreatedBy().getName(),
+                    updatedClub.getName(),
+                    updatedClub.getRejectionReason());
+        } catch (Exception ex) {
+            log.warn("Club rejection email failed for club {}", updatedClub.getId(), ex);
+        }
+        return toResponse(updatedClub);
     }
 
     public void deleteClub(Long id) {

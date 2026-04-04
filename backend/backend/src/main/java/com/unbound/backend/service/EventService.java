@@ -13,7 +13,9 @@ import com.unbound.backend.repository.ClubRepository;
 import com.unbound.backend.repository.EventRepository;
 import com.unbound.backend.repository.FestRepository;
 import com.unbound.backend.repository.RegistrationRepository;
+import com.unbound.backend.service.EmailService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,12 +24,14 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EventService {
 
     private final EventRepository eventRepository;
     private final FestRepository festRepository;
     private final ClubRepository clubRepository;
     private final RegistrationRepository registrationRepository;
+    private final EmailService emailService;
 
     public EventResponse toResponse(Event event) {
         int currentRegistrations = registrationRepository.countByEvent(event);
@@ -84,7 +88,7 @@ public class EventService {
 
     // GET /api/events with optional filters
     public List<EventResponse> getAllPublishedEvents(EventCategory category, Long clubId, Long festId,
-                                                      LocalDateTime from, LocalDateTime to) {
+            LocalDateTime from, LocalDateTime to) {
         return eventRepository.filterPublishedEvents(category, clubId, festId, from, to)
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
@@ -141,7 +145,17 @@ public class EventService {
             throw new BadRequestException("Event is already published");
         }
         event.setStatus(EventStatus.PUBLISHED);
-        return toResponse(eventRepository.save(event));
+        Event updatedEvent = eventRepository.save(event);
+        try {
+            emailService.sendEventPublishedNotification(
+                    updatedEvent.getClub().getCreatedBy().getEmail(),
+                    updatedEvent.getClub().getCreatedBy().getName(),
+                    updatedEvent.getTitle(),
+                    updatedEvent.getEventDate());
+        } catch (Exception ex) {
+            log.warn("Event published email failed for event {}", updatedEvent.getId(), ex);
+        }
+        return toResponse(updatedEvent);
     }
 
     // PATCH /api/events/{id}/cancel
@@ -152,7 +166,18 @@ public class EventService {
             throw new BadRequestException("Event is already cancelled");
         }
         event.setStatus(EventStatus.CANCELLED);
-        return toResponse(eventRepository.save(event));
+        Event updatedEvent = eventRepository.save(event);
+        try {
+            emailService.sendEventCancelledNotification(
+                    updatedEvent.getClub().getCreatedBy().getEmail(),
+                    updatedEvent.getClub().getCreatedBy().getName(),
+                    updatedEvent.getTitle(),
+                    updatedEvent.getEventDate(),
+                    updatedEvent.getVenue());
+        } catch (Exception ex) {
+            log.warn("Event cancelled email failed for event {}", updatedEvent.getId(), ex);
+        }
+        return toResponse(updatedEvent);
     }
 
     // DELETE /api/events/{id}
