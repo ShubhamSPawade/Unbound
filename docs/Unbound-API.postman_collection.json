@@ -1,0 +1,329 @@
+{
+  "info": {
+    "name": "Unbound API",
+    "description": "Unbound Event Management Platform — Full API Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "studentToken", "value": "" },
+    { "key": "clubAdminToken", "value": "" },
+    { "key": "collegeAdminToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register Student",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Student\",\n  \"email\": \"student@test.com\",\n  \"password\": \"Test@1234\",\n  \"role\": \"STUDENT\",\n  \"department\": \"Computer Science\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Register Club Admin",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Club Admin\",\n  \"email\": \"clubadmin@test.com\",\n  \"password\": \"Test@1234\",\n  \"role\": \"CLUB_ADMIN\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Register College Admin",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"College Admin\",\n  \"email\": \"collegeadmin@test.com\",\n  \"password\": \"Test@1234\",\n  \"role\": \"COLLEGE_ADMIN\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@test.com\",\n  \"password\": \"Test@1234\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Register SUPER_ADMIN (should fail 422)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Super\",\n  \"email\": \"super@test.com\",\n  \"password\": \"Test@1234\",\n  \"role\": \"SUPER_ADMIN\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/users/me",
+            "header": [{ "key": "Authorization", "value": "Bearer {{studentToken}}" }]
+          }
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/users/me",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{studentToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Updated Name\"\n}" }
+          }
+        },
+        {
+          "name": "Get All Users (Admin)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/users",
+            "header": [{ "key": "Authorization", "value": "Bearer {{collegeAdminToken}}" }]
+          }
+        },
+        {
+          "name": "Get User By ID (Admin)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/users/1",
+            "header": [{ "key": "Authorization", "value": "Bearer {{collegeAdminToken}}" }]
+          }
+        },
+        {
+          "name": "Deactivate User (Admin)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/users/1",
+            "header": [{ "key": "Authorization", "value": "Bearer {{collegeAdminToken}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Clubs",
+      "item": [
+        {
+          "name": "Create Club (Club Admin)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/clubs",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{clubAdminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Tech Club\",\n  \"description\": \"A technical club\",\n  \"category\": \"Technical\",\n  \"contactEmail\": \"techclub@college.com\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Approved Clubs",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/clubs",
+            "header": [{ "key": "Authorization", "value": "Bearer {{studentToken}}" }]
+          }
+        },
+        {
+          "name": "Get All Clubs (Admin)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/clubs/admin/all",
+            "header": [{ "key": "Authorization", "value": "Bearer {{collegeAdminToken}}" }]
+          }
+        },
+        {
+          "name": "Approve Club (Admin)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/clubs/1/approve",
+            "header": [{ "key": "Authorization", "value": "Bearer {{collegeAdminToken}}" }]
+          }
+        },
+        {
+          "name": "Reject Club (Admin)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/clubs/1/reject",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{collegeAdminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"rejectionReason\": \"Incomplete details\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Fests",
+      "item": [
+        {
+          "name": "Create Fest (Admin)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/fests",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{collegeAdminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Unbound Fest 2026\",\n  \"description\": \"Annual college fest\",\n  \"startDate\": \"2026-04-10\",\n  \"endDate\": \"2026-04-12\",\n  \"collegeId\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Get All Fests",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/fests",
+            "header": [{ "key": "Authorization", "value": "Bearer {{studentToken}}" }]
+          }
+        },
+        {
+          "name": "Get Fests By College",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/fests/college/1",
+            "header": [{ "key": "Authorization", "value": "Bearer {{studentToken}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "Create Event (Club Admin)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/events",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{clubAdminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Coding Workshop\",\n  \"description\": \"Learn DSA\",\n  \"venue\": \"Lab 101\",\n  \"eventDate\": \"2026-05-15T10:00:00\",\n  \"maxParticipants\": 50,\n  \"category\": \"WORKSHOP\",\n  \"clubId\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Publish Event",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/events/1/publish",
+            "header": [{ "key": "Authorization", "value": "Bearer {{clubAdminToken}}" }]
+          }
+        },
+        {
+          "name": "Get Published Events",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/events",
+            "header": [{ "key": "Authorization", "value": "Bearer {{studentToken}}" }]
+          }
+        },
+        {
+          "name": "Filter Events by Category",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/events?category=WORKSHOP",
+              "query": [{ "key": "category", "value": "WORKSHOP" }]
+            },
+            "header": [{ "key": "Authorization", "value": "Bearer {{studentToken}}" }]
+          }
+        },
+        {
+          "name": "Get Events by Fest",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/events/fest/1",
+            "header": [{ "key": "Authorization", "value": "Bearer {{studentToken}}" }]
+          }
+        },
+        {
+          "name": "Cancel Event",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/events/1/cancel",
+            "header": [{ "key": "Authorization", "value": "Bearer {{clubAdminToken}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Registrations",
+      "item": [
+        {
+          "name": "Register for Event",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/registrations/1",
+            "header": [{ "key": "Authorization", "value": "Bearer {{studentToken}}" }]
+          }
+        },
+        {
+          "name": "Get My Registrations",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/registrations/my",
+            "header": [{ "key": "Authorization", "value": "Bearer {{studentToken}}" }]
+          }
+        },
+        {
+          "name": "Get Registration Count",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/registrations/event/1/count",
+            "header": [{ "key": "Authorization", "value": "Bearer {{studentToken}}" }]
+          }
+        },
+        {
+          "name": "Get All Registrations for Event (Admin)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/registrations/event/1",
+            "header": [{ "key": "Authorization", "value": "Bearer {{collegeAdminToken}}" }]
+          }
+        },
+        {
+          "name": "Cancel Registration",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/registrations/1",
+            "header": [{ "key": "Authorization", "value": "Bearer {{studentToken}}" }]
+          }
+        }
+      ]
+    }
+  ]
+}

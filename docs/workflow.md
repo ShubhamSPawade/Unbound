@@ -19,7 +19,7 @@ Example branches:
 
 ```
 feature/event-registration
-feature/react-dashboard
+feature/nextjs-dashboard
 fix/login-validation
 chore/update-dependencies
 
