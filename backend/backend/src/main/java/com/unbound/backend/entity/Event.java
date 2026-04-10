@@ -32,6 +32,9 @@ public class Event {
 
     private String venue;
 
+    // null or 0 = free event, > 0 = paid event
+    private Double feeAmount;
+
     @Column(nullable = false)
     private LocalDateTime eventDate;
 
