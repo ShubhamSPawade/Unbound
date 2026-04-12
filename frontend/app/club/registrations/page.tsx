@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Search, Download, Mail, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { exportRegistrationsToCSV } from "@/lib/csv-export"
 
 const events = [
   { id: 1, title: "Hackathon 2026", registrations: 156 },
@@ -80,6 +81,11 @@ export default function ClubRegistrationsPage() {
     ? events.find(e => e.id === selectedEvent) 
     : null
 
+  const handleExportCSV = () => {
+    const eventName = selectedEventData?.title || "all-events"
+    exportRegistrationsToCSV(filteredRegistrations, eventName)
+  }
+
   return (
     <div>
       {/* Page Header */}
@@ -136,6 +142,7 @@ export default function ClubRegistrationsPage() {
         </div>
         <Button
           variant="outline"
+          onClick={handleExportCSV}
           className="border-4 border-foreground font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
         >
           <Download className="mr-2 h-4 w-4" />
