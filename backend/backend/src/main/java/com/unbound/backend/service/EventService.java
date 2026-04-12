@@ -40,6 +40,8 @@ public class EventService {
                 .eventDate(event.getEventDate())
                 .maxParticipants(event.getMaxParticipants())
                 .currentRegistrations(currentRegistrations)
+                .feeAmount(event.getFeeAmount())
+                .isPaid(event.getFeeAmount() != null && event.getFeeAmount() > 0)
                 .category(event.getCategory())
                 .status(event.getStatus())
                 .festId(event.getFest() != null ? event.getFest().getId() : null)
@@ -74,6 +76,7 @@ public class EventService {
                 .eventDate(request.getEventDate())
                 .maxParticipants(request.getMaxParticipants())
                 .category(request.getCategory())
+                .feeAmount(request.getFeeAmount())
                 .status(EventStatus.DRAFT)
                 .fest(fest)
                 .club(club)
@@ -127,6 +130,7 @@ public class EventService {
         event.setEventDate(request.getEventDate());
         event.setMaxParticipants(request.getMaxParticipants());
         event.setCategory(request.getCategory());
+        event.setFeeAmount(request.getFeeAmount());
         event.setFest(request.getFestId() != null ? getFest(request.getFestId()) : null);
         event.setClub(getClub(request.getClubId()));
 
