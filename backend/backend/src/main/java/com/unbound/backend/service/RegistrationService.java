@@ -10,7 +10,9 @@ import com.unbound.backend.exception.BadRequestException;
 import com.unbound.backend.exception.ResourceNotFoundException;
 import com.unbound.backend.repository.EventRepository;
 import com.unbound.backend.repository.RegistrationRepository;
+import com.unbound.backend.service.EmailService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,91 +20,120 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RegistrationService {
 
-    private final RegistrationRepository registrationRepository;
-    private final EventRepository eventRepository;
-    private final UserService userService;
+        private final RegistrationRepository registrationRepository;
+        private final EventRepository eventRepository;
+        private final UserService userService;
+        private final EmailService emailService;
 
-    private RegistrationResponse toResponse(Registration reg) {
-        return RegistrationResponse.builder()
-                .id(reg.getId())
-                .eventId(reg.getEvent().getId())
-                .eventTitle(reg.getEvent().getTitle())
-                .eventVenue(reg.getEvent().getVenue())
-                .eventDate(reg.getEvent().getEventDate())
-                .userId(reg.getUser().getId())
-                .userName(reg.getUser().getName())
-                .userEmail(reg.getUser().getEmail())
-                .status(reg.getStatus())
-                .registrationDate(reg.getRegistrationDate())
-                .build();
-    }
-
-    // POST /api/registrations/{eventId} — student registers for event
-    public RegistrationResponse registerForEvent(Long eventId) {
-        User currentUser = userService.getCurrentUser();
-
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + eventId));
-
-        // Only published events can be registered for
-        if (event.getStatus() != EventStatus.PUBLISHED) {
-            throw new BadRequestException("Event is not open for registration");
+        private RegistrationResponse toResponse(Registration reg) {
+                return RegistrationResponse.builder()
+                                .id(reg.getId())
+                                .eventId(reg.getEvent().getId())
+                                .eventTitle(reg.getEvent().getTitle())
+                                .eventVenue(reg.getEvent().getVenue())
+                                .eventDate(reg.getEvent().getEventDate())
+                                .userId(reg.getUser().getId())
+                                .userName(reg.getUser().getName())
+                                .userEmail(reg.getUser().getEmail())
+                                .status(reg.getStatus())
+                                .registrationDate(reg.getRegistrationDate())
+                                .build();
         }
 
-        // Check duplicate registration
-        if (registrationRepository.existsByUserAndEvent(currentUser, event)) {
-            throw new BadRequestException("You are already registered for this event");
+        // POST /api/registrations/{eventId} — student registers for event
+        public RegistrationResponse registerForEvent(Long eventId) {
+                User currentUser = userService.getCurrentUser();
+
+                Event event = eventRepository.findById(eventId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Event not found with id: " + eventId));
+
+                // Only published events can be registered for
+                if (event.getStatus() != EventStatus.PUBLISHED) {
+                        throw new BadRequestException("Event is not open for registration");
+                }
+
+                // Check duplicate registration
+                if (registrationRepository.existsByUserAndEvent(currentUser, event)) {
+                        throw new BadRequestException("You are already registered for this event");
+                }
+
+                // Capacity validation (#20)
+                int currentCount = registrationRepository.countByEvent(event);
+                if (currentCount >= event.getMaxParticipants()) {
+                        throw new BadRequestException("Event is full. No more registrations allowed.");
+                }
+
+                Registration registration = Registration.builder()
+                                .user(currentUser)
+                                .event(event)
+                                .status(RegistrationStatus.CONFIRMED)
+                                .build();
+
+                Registration savedRegistration = registrationRepository.save(registration);
+                try {
+                        emailService.sendEventRegistrationConfirmation(
+                                        currentUser.getEmail(),
+                                        currentUser.getName(),
+                                        event.getTitle(),
+                                        event.getEventDate(),
+                                        event.getVenue());
+                } catch (Exception ex) {
+                        log.warn("Registration confirmation email failed for registration {}",
+                                        savedRegistration.getId(), ex);
+                }
+                return toResponse(savedRegistration);
         }
 
-        // Capacity validation (#20)
-        int currentCount = registrationRepository.countByEvent(event);
-        if (currentCount >= event.getMaxParticipants()) {
-            throw new BadRequestException("Event is full. No more registrations allowed.");
+        // DELETE /api/registrations/{eventId} — student cancels registration
+        public void cancelRegistration(Long eventId) {
+                User currentUser = userService.getCurrentUser();
+
+                Event event = eventRepository.findById(eventId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Event not found with id: " + eventId));
+
+                Registration registration = registrationRepository.findByUserAndEvent(currentUser, event)
+                                .orElseThrow(() -> new BadRequestException("You are not registered for this event"));
+
+                registrationRepository.delete(registration);
+                try {
+                        emailService.sendEventRegistrationCancellation(
+                                        currentUser.getEmail(),
+                                        currentUser.getName(),
+                                        event.getTitle(),
+                                        event.getEventDate(),
+                                        event.getVenue());
+                } catch (Exception ex) {
+                        log.warn("Registration cancellation email failed for event {}", event.getId(), ex);
+                }
         }
 
-        Registration registration = Registration.builder()
-                .user(currentUser)
-                .event(event)
-                .status(RegistrationStatus.CONFIRMED)
-                .build();
+        // GET /api/registrations/my — student's own registrations
+        public List<RegistrationResponse> getMyRegistrations() {
+                User currentUser = userService.getCurrentUser();
+                return registrationRepository.findAllByUser(currentUser)
+                                .stream().map(this::toResponse).collect(Collectors.toList());
+        }
 
-        return toResponse(registrationRepository.save(registration));
-    }
+        // GET /api/registrations/event/{eventId} — admin views all registrations for an
+        // event
+        public List<RegistrationResponse> getRegistrationsByEvent(Long eventId) {
+                Event event = eventRepository.findById(eventId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Event not found with id: " + eventId));
+                return registrationRepository.findAllByEvent(event)
+                                .stream().map(this::toResponse).collect(Collectors.toList());
+        }
 
-    // DELETE /api/registrations/{eventId} — student cancels registration
-    public void cancelRegistration(Long eventId) {
-        User currentUser = userService.getCurrentUser();
-
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + eventId));
-
-        Registration registration = registrationRepository.findByUserAndEvent(currentUser, event)
-                .orElseThrow(() -> new BadRequestException("You are not registered for this event"));
-
-        registrationRepository.delete(registration);
-    }
-
-    // GET /api/registrations/my — student's own registrations
-    public List<RegistrationResponse> getMyRegistrations() {
-        User currentUser = userService.getCurrentUser();
-        return registrationRepository.findAllByUser(currentUser)
-                .stream().map(this::toResponse).collect(Collectors.toList());
-    }
-
-    // GET /api/registrations/event/{eventId} — admin views all registrations for an event
-    public List<RegistrationResponse> getRegistrationsByEvent(Long eventId) {
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + eventId));
-        return registrationRepository.findAllByEvent(event)
-                .stream().map(this::toResponse).collect(Collectors.toList());
-    }
-
-    // GET /api/registrations/event/{eventId}/count
-    public int getRegistrationCount(Long eventId) {
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + eventId));
-        return registrationRepository.countByEvent(event);
-    }
+        // GET /api/registrations/event/{eventId}/count
+        public int getRegistrationCount(Long eventId) {
+                Event event = eventRepository.findById(eventId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Event not found with id: " + eventId));
+                return registrationRepository.countByEvent(event);
+        }
 }
