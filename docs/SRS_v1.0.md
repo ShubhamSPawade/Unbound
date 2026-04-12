@@ -3,9 +3,9 @@
 
 | Field | Details |
 |-------|---------|
-| Document Version | 0.3 |
+| Document Version | 1.0 |
 | Date | April 2026 |
-| Prepared By | Samiksha Mulik |
+| Prepared By | Prasad Ingole |
 | Institution | MIT Academy of Engineering (MITAOE) |
 | Status | Active |
 
@@ -18,6 +18,7 @@
 | 0.1 | 10/03/2026 | Pratik Bhosale | Initial Draft |
 | 0.2 | 15/03/2026 | Samiksha Mulik | Refined Scope and Constraints |
 | 0.3 | 01/04/2026 | Samiksha Mulik | Changed Frontend Tech from React to Next.js |
+| 1.0 | 10/04/2026 | Prasad Ingole | Major update: added Payment module FRs (FR-PAY-01 to FR-PAY-10), Team/Solo event participation FRs, SUPER_ADMIN creation specification, Razorpay integration details, Core user flows section, EventType and FeeType enums, NFR reliability specification, Result announcement and prize distribution added to out-of-scope, RBAC matrix updated with Payment row, Glossary expanded |
 
 ---
 

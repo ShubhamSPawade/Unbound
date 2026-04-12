@@ -32,6 +32,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PaymentService {
 
+    private static final int PAISE_MULTIPLIER = 100; // 1 INR = 100 paise
+
     private final PaymentRepository paymentRepository;
     private final EventRepository eventRepository;
     private final RegistrationRepository registrationRepository;
@@ -76,7 +78,7 @@ public class PaymentService {
 
             JSONObject orderRequest = new JSONObject();
             // Razorpay amount is in paise (1 INR = 100 paise)
-            orderRequest.put("amount", (int)(event.getFeeAmount() * 100));
+            orderRequest.put("amount", (int)(event.getFeeAmount() * PAISE_MULTIPLIER));
             orderRequest.put("currency", "INR");
             orderRequest.put("receipt", "receipt_event_" + eventId + "_user_" + currentUser.getId());
 
