@@ -1,9 +1,13 @@
 package com.unbound.backend.controller;
 
+import com.unbound.backend.dto.request.BulkClubActionRequest;
 import com.unbound.backend.dto.request.ClubRequest;
 import com.unbound.backend.dto.request.ClubStatusRequest;
 import com.unbound.backend.dto.response.ApiResponse;
+import com.unbound.backend.dto.response.BulkActionResponse;
 import com.unbound.backend.dto.response.ClubResponse;
+import com.unbound.backend.dto.response.ClubStatisticsResponse;
+import com.unbound.backend.enums.ClubStatus;
 import com.unbound.backend.service.ClubService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -64,6 +68,30 @@ public class ClubController {
         return ResponseEntity.ok(ApiResponse.success("All clubs fetched", clubService.getAllClubsForAdmin()));
     }
 
+    @GetMapping("/admin/status/{status}")
+    @Operation(summary = "Get clubs by status (Admin only)")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'COLLEGE_ADMIN')")
+    public ResponseEntity<ApiResponse<List<ClubResponse>>> getClubsByStatus(@PathVariable ClubStatus status) {
+        return ResponseEntity.ok(ApiResponse.success("Clubs fetched by status", clubService.getClubsByStatus(status)));
+    }
+
+    @GetMapping("/admin/filter")
+    @Operation(summary = "Filter clubs by status and college (Admin only)")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'COLLEGE_ADMIN')")
+    public ResponseEntity<ApiResponse<List<ClubResponse>>> filterClubs(
+            @RequestParam(required = false) ClubStatus status,
+            @RequestParam(required = false) Long collegeId) {
+        return ResponseEntity.ok(ApiResponse.success("Filtered clubs fetched", 
+                clubService.filterClubs(status, collegeId)));
+    }
+
+    @GetMapping("/admin/statistics")
+    @Operation(summary = "Get club statistics (Admin only)")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'COLLEGE_ADMIN')")
+    public ResponseEntity<ApiResponse<ClubStatisticsResponse>> getClubStatistics() {
+        return ResponseEntity.ok(ApiResponse.success("Statistics fetched", clubService.getClubStatistics()));
+    }
+
     @PatchMapping("/{id}/approve")
     @Operation(summary = "Approve a club (Admin only)")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'COLLEGE_ADMIN')")
@@ -77,6 +105,15 @@ public class ClubController {
     public ResponseEntity<ApiResponse<ClubResponse>> rejectClub(
             @PathVariable Long id, @Valid @RequestBody ClubStatusRequest request) {
         return ResponseEntity.ok(ApiResponse.success("Club rejected", clubService.rejectClub(id, request)));
+    }
+
+    @PostMapping("/admin/bulk-action")
+    @Operation(summary = "Bulk approve or reject clubs (Admin only)")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'COLLEGE_ADMIN')")
+    public ResponseEntity<ApiResponse<BulkActionResponse>> bulkApproveOrReject(
+            @Valid @RequestBody BulkClubActionRequest request) {
+        return ResponseEntity.ok(ApiResponse.success("Bulk action completed", 
+                clubService.bulkApproveOrReject(request)));
     }
 
     @DeleteMapping("/{id}")
