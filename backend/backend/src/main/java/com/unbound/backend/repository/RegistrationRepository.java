@@ -16,6 +16,30 @@ import java.util.Optional;
 public interface RegistrationRepository extends JpaRepository<Registration, Long> {
     boolean existsByUserAndEvent(User user, Event event);
     int countByEvent(Event event);
+    
+    // Optimized queries with JOIN FETCH to avoid N+1 problem
+    @Query("SELECT r FROM Registration r " +
+           "LEFT JOIN FETCH r.event e " +
+           "LEFT JOIN FETCH e.club c " +
+           "LEFT JOIN FETCH e.fest f " +
+           "WHERE r.event = :event")
+    List<Registration> findAllByEventWithRelations(@Param("event") Event event);
+
+    @Query("SELECT r FROM Registration r " +
+           "LEFT JOIN FETCH r.event e " +
+           "LEFT JOIN FETCH e.club c " +
+           "LEFT JOIN FETCH e.fest f " +
+           "WHERE r.user = :user " +
+           "ORDER BY r.registrationDate DESC")
+    List<Registration> findAllByUserWithRelations(@Param("user") User user);
+
+    @Query("SELECT r FROM Registration r " +
+           "LEFT JOIN FETCH r.event e " +
+           "LEFT JOIN FETCH r.user u " +
+           "WHERE r.user = :user AND r.event = :event")
+    Optional<Registration> findByUserAndEventWithRelations(@Param("user") User user, @Param("event") Event event);
+
+    // Original methods for backward compatibility
     List<Registration> findAllByEvent(Event event);
     List<Registration> findAllByUser(User user);
     Optional<Registration> findByUserAndEvent(User user, Event event);
@@ -23,4 +47,11 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     // Count only confirmed registrations for accurate capacity tracking
     @Query("SELECT COUNT(r) FROM Registration r WHERE r.event = :event AND r.status = :status")
     int countByEventAndStatus(@Param("event") Event event, @Param("status") RegistrationStatus status);
+
+    // Batch operations
+    @Query("SELECT r FROM Registration r " +
+           "LEFT JOIN FETCH r.event e " +
+           "LEFT JOIN FETCH r.user u " +
+           "WHERE r.event.id IN :eventIds")
+    List<Registration> findAllByEventIdInWithRelations(@Param("eventIds") List<Long> eventIds);
 }

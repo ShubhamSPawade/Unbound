@@ -16,10 +16,32 @@ import java.util.Optional;
 public interface ClubRepository extends JpaRepository<Club, Long> {
     boolean existsByCreatedBy(User createdBy);
     Optional<Club> findByCreatedBy(User createdBy);
-    List<Club> findAllByStatusAndIsActiveTrue(ClubStatus status);
-    List<Club> findAllByIsActiveTrue();
     boolean existsByName(String name);
     boolean existsByContactEmail(String contactEmail);
+
+    // Optimized queries with JOIN FETCH
+    @Query("SELECT c FROM Club c " +
+           "LEFT JOIN FETCH c.college col " +
+           "LEFT JOIN FETCH c.createdBy u " +
+           "WHERE c.status = :status AND c.isActive = true " +
+           "ORDER BY c.createdAt DESC")
+    List<Club> findAllByStatusAndIsActiveTrueWithRelations(@Param("status") ClubStatus status);
+
+    @Query("SELECT c FROM Club c " +
+           "LEFT JOIN FETCH c.college col " +
+           "LEFT JOIN FETCH c.createdBy u " +
+           "WHERE c.isActive = true")
+    List<Club> findAllByIsActiveTrueWithRelations();
+
+    @Query("SELECT c FROM Club c " +
+           "LEFT JOIN FETCH c.college col " +
+           "LEFT JOIN FETCH c.createdBy u " +
+           "WHERE c.id = :clubId AND c.isActive = true")
+    Optional<Club> findByIdWithRelations(@Param("clubId") Long clubId);
+
+    // Original methods for backward compatibility
+    List<Club> findAllByStatusAndIsActiveTrue(ClubStatus status);
+    List<Club> findAllByIsActiveTrue();
 
     // Enhanced queries for approval system
     List<Club> findAllByStatusAndIsActiveTrueOrderByCreatedAtDesc(ClubStatus status);
@@ -27,9 +49,27 @@ public interface ClubRepository extends JpaRepository<Club, Long> {
     int countByStatus(ClubStatus status);
     int countByCollegeAndStatus(College college, ClubStatus status);
 
+    // Optimized filter with JOIN FETCH
+    @Query("SELECT c FROM Club c " +
+           "LEFT JOIN FETCH c.college col " +
+           "LEFT JOIN FETCH c.createdBy u " +
+           "WHERE c.isActive = true " +
+           "AND (:status IS NULL OR c.status = :status) " +
+           "AND (:collegeId IS NULL OR c.college.id = :collegeId) " +
+           "ORDER BY c.createdAt DESC")
+    List<Club> filterClubsOptimized(@Param("status") ClubStatus status, @Param("collegeId") Long collegeId);
+
+    // Original filter
     @Query("SELECT c FROM Club c WHERE c.isActive = true " +
            "AND (:status IS NULL OR c.status = :status) " +
            "AND (:collegeId IS NULL OR c.college.id = :collegeId) " +
            "ORDER BY c.createdAt DESC")
     List<Club> filterClubs(@Param("status") ClubStatus status, @Param("collegeId") Long collegeId);
+
+    // Batch operations
+    @Query("SELECT c FROM Club c " +
+           "LEFT JOIN FETCH c.college col " +
+           "LEFT JOIN FETCH c.createdBy u " +
+           "WHERE c.id IN :clubIds AND c.isActive = true")
+    List<Club> findAllByIdInWithRelations(@Param("clubIds") List<Long> clubIds);
 }
