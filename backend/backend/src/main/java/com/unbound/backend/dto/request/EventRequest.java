@@ -31,6 +31,9 @@ public class EventRequest {
     @NotNull(message = "Category is required")
     private EventCategory category;
 
+    // Optional — null or 0 means free event
+    private Double feeAmount;
+
     // Optional — event can be standalone (not part of a fest)
     private Long festId;
 

@@ -20,6 +20,8 @@ public class EventResponse {
     private LocalDateTime eventDate;
     private int maxParticipants;
     private int currentRegistrations;
+    private Double feeAmount;
+    private boolean isPaid;
     private EventCategory category;
     private EventStatus status;
     private Long festId;
