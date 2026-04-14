@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useState, useMemo } from "react"
+import { useState, useMemo, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Infinity, ArrowLeft, Eye, EyeOff, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -12,7 +12,7 @@ import { useAuth } from "@/lib/auth-context"
 import { useFormValidation, validators } from "@/hooks/use-form-validation"
 import { ThemeToggle } from "@/components/theme-toggle"
 
-export default function SignupPage() {
+function SignupContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const initialRole = (searchParams.get("role") as "student" | "club") || "student"
@@ -257,5 +257,13 @@ export default function SignupPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+      <SignupContent />
+    </Suspense>
   )
 }

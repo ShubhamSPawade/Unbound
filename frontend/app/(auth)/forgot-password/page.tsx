@@ -70,7 +70,6 @@ export default function ForgotPasswordPage() {
               <ThemeToggle />
             </div>
           </div>
-          </Link>
 
           {!submitted ? (
             <>
