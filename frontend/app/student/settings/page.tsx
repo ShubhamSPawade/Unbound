@@ -1,29 +1,33 @@
 "use client"
 
-import { useState } from "react"
-import { User, Mail, Phone, Building, GraduationCap, Lock, Bell, Moon, Save, Camera } from "lucide-react"
+import { useState, useEffect } from "react"
+import { User, Mail, Phone, Building, GraduationCap, Lock, Bell, Save, Camera } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/components/toast-provider"
+import { useAuth } from "@/lib/auth-context"
+import { userApi } from "@/lib/api"
 
 export default function StudentSettingsPage() {
-  const { success } = useToast()
+  const { success, error } = useToast()
+  const { user, updateProfile } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
+
   const [profileData, setProfileData] = useState({
-    name: "Alex Student",
-    email: "alex@university.edu",
-    phone: "+91 9876543210",
-    department: "Computer Science",
-    year: "3rd Year",
-    rollNumber: "CS2023045",
+    name: "",
+    email: "",
+    phone: "",
+    department: "",
   })
+
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   })
+
   const [notifications, setNotifications] = useState({
     emailNotifications: true,
     eventReminders: true,
@@ -31,22 +35,47 @@ export default function StudentSettingsPage() {
     promotionalEmails: false,
   })
 
+  // Load real user data on mount
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        name: user.name || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        department: user.department || "",
+      })
+    }
+  }, [user])
+
   const handleProfileSave = async () => {
     setIsLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    success("Profile Updated", "Your profile has been saved successfully")
-    setIsLoading(false)
+    try {
+      await updateProfile({
+        name: profileData.name,
+        phone: profileData.phone,
+        department: profileData.department,
+      })
+      success("Profile Updated", "Your profile has been saved successfully")
+    } catch {
+      error("Error", "Failed to update profile. Please try again.")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handlePasswordChange = async () => {
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      return
-    }
+    if (passwordData.newPassword !== passwordData.confirmPassword) return
     setIsLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    success("Password Changed", "Your password has been updated successfully")
-    setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
-    setIsLoading(false)
+    try {
+      // Password change endpoint — to be implemented
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      success("Password Changed", "Your password has been updated successfully")
+      setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
+    } catch {
+      error("Error", "Failed to change password. Please try again.")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -65,7 +94,6 @@ export default function StudentSettingsPage() {
           </h2>
         </div>
         <div className="p-6">
-          {/* Avatar */}
           <div className="mb-6 flex items-center gap-4">
             <div className="relative">
               <div className="flex h-20 w-20 items-center justify-center border-4 border-foreground bg-primary">
@@ -76,16 +104,15 @@ export default function StudentSettingsPage() {
               </button>
             </div>
             <div>
-              <p className="font-bold">{profileData.name}</p>
-              <p className="text-sm text-muted-foreground">Student</p>
+              <p className="font-bold">{user?.name}</p>
+              <p className="text-sm text-muted-foreground capitalize">{user?.role}</p>
             </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <Label htmlFor="name" className="mb-2 flex items-center gap-2 font-bold">
-                <User className="h-4 w-4" />
-                Full Name
+                <User className="h-4 w-4" /> Full Name
               </Label>
               <Input
                 id="name"
@@ -96,21 +123,19 @@ export default function StudentSettingsPage() {
             </div>
             <div>
               <Label htmlFor="email" className="mb-2 flex items-center gap-2 font-bold">
-                <Mail className="h-4 w-4" />
-                Email
+                <Mail className="h-4 w-4" /> Email
               </Label>
               <Input
                 id="email"
                 type="email"
                 value={profileData.email}
-                onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
-                className="border-4 border-foreground shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                disabled
+                className="border-4 border-foreground bg-muted"
               />
             </div>
             <div>
               <Label htmlFor="phone" className="mb-2 flex items-center gap-2 font-bold">
-                <Phone className="h-4 w-4" />
-                Phone Number
+                <Phone className="h-4 w-4" /> Phone Number
               </Label>
               <Input
                 id="phone"
@@ -121,21 +146,8 @@ export default function StudentSettingsPage() {
               />
             </div>
             <div>
-              <Label htmlFor="rollNumber" className="mb-2 flex items-center gap-2 font-bold">
-                <GraduationCap className="h-4 w-4" />
-                Roll Number
-              </Label>
-              <Input
-                id="rollNumber"
-                value={profileData.rollNumber}
-                disabled
-                className="border-4 border-foreground bg-muted"
-              />
-            </div>
-            <div>
               <Label htmlFor="department" className="mb-2 flex items-center gap-2 font-bold">
-                <Building className="h-4 w-4" />
-                Department
+                <Building className="h-4 w-4" /> Department
               </Label>
               <Input
                 id="department"
@@ -143,23 +155,6 @@ export default function StudentSettingsPage() {
                 onChange={(e) => setProfileData({ ...profileData, department: e.target.value })}
                 className="border-4 border-foreground shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
               />
-            </div>
-            <div>
-              <Label htmlFor="year" className="mb-2 flex items-center gap-2 font-bold">
-                <GraduationCap className="h-4 w-4" />
-                Year
-              </Label>
-              <select
-                id="year"
-                value={profileData.year}
-                onChange={(e) => setProfileData({ ...profileData, year: e.target.value })}
-                className="w-full border-4 border-foreground bg-background px-3 py-2 font-medium shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-              >
-                <option>1st Year</option>
-                <option>2nd Year</option>
-                <option>3rd Year</option>
-                <option>4th Year</option>
-              </select>
             </div>
           </div>
 
@@ -178,46 +173,27 @@ export default function StudentSettingsPage() {
       <section className="mb-8 border-4 border-foreground bg-card shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
         <div className="border-b-4 border-foreground bg-muted p-4">
           <h2 className="flex items-center gap-2 text-xl font-black">
-            <Lock className="h-5 w-5" />
-            Change Password
+            <Lock className="h-5 w-5" /> Change Password
           </h2>
         </div>
         <div className="space-y-4 p-6">
           <div>
-            <Label htmlFor="currentPassword" className="mb-2 block font-bold">
-              Current Password
-            </Label>
-            <Input
-              id="currentPassword"
-              type="password"
-              value={passwordData.currentPassword}
+            <Label htmlFor="currentPassword" className="mb-2 block font-bold">Current Password</Label>
+            <Input id="currentPassword" type="password" value={passwordData.currentPassword}
               onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-              className="border-4 border-foreground shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-            />
+              className="border-4 border-foreground shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]" />
           </div>
           <div>
-            <Label htmlFor="newPassword" className="mb-2 block font-bold">
-              New Password
-            </Label>
-            <Input
-              id="newPassword"
-              type="password"
-              value={passwordData.newPassword}
+            <Label htmlFor="newPassword" className="mb-2 block font-bold">New Password</Label>
+            <Input id="newPassword" type="password" value={passwordData.newPassword}
               onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-              className="border-4 border-foreground shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-            />
+              className="border-4 border-foreground shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]" />
           </div>
           <div>
-            <Label htmlFor="confirmPassword" className="mb-2 block font-bold">
-              Confirm New Password
-            </Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              value={passwordData.confirmPassword}
+            <Label htmlFor="confirmPassword" className="mb-2 block font-bold">Confirm New Password</Label>
+            <Input id="confirmPassword" type="password" value={passwordData.confirmPassword}
               onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-              className="border-4 border-foreground shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-            />
+              className="border-4 border-foreground shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]" />
             {passwordData.newPassword && passwordData.confirmPassword && passwordData.newPassword !== passwordData.confirmPassword && (
               <p className="mt-2 text-sm font-bold text-destructive">Passwords do not match</p>
             )}
@@ -227,8 +203,7 @@ export default function StudentSettingsPage() {
             disabled={isLoading || !passwordData.currentPassword || !passwordData.newPassword || passwordData.newPassword !== passwordData.confirmPassword}
             className="border-4 border-foreground bg-primary font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none disabled:opacity-50"
           >
-            <Lock className="mr-2 h-4 w-4" />
-            Update Password
+            <Lock className="mr-2 h-4 w-4" /> Update Password
           </Button>
         </div>
       </section>
@@ -237,51 +212,27 @@ export default function StudentSettingsPage() {
       <section className="border-4 border-foreground bg-card shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
         <div className="border-b-4 border-foreground bg-muted p-4">
           <h2 className="flex items-center gap-2 text-xl font-black">
-            <Bell className="h-5 w-5" />
-            Notifications
+            <Bell className="h-5 w-5" /> Notifications
           </h2>
         </div>
         <div className="space-y-4 p-6">
-          <div className="flex items-center justify-between border-b-2 border-foreground/20 pb-4">
-            <div>
-              <p className="font-bold">Email Notifications</p>
-              <p className="text-sm text-muted-foreground">Receive email updates about your activity</p>
+          {[
+            { key: "emailNotifications", label: "Email Notifications", desc: "Receive email updates about your activity" },
+            { key: "eventReminders", label: "Event Reminders", desc: "Get notified before events you've registered for" },
+            { key: "paymentAlerts", label: "Payment Alerts", desc: "Receive updates about your payments and refunds" },
+            { key: "promotionalEmails", label: "Promotional Emails", desc: "Receive news and offers from event organizers" },
+          ].map(({ key, label, desc }, i, arr) => (
+            <div key={key} className={`flex items-center justify-between ${i < arr.length - 1 ? "border-b-2 border-foreground/20 pb-4" : ""}`}>
+              <div>
+                <p className="font-bold">{label}</p>
+                <p className="text-sm text-muted-foreground">{desc}</p>
+              </div>
+              <Switch
+                checked={notifications[key as keyof typeof notifications]}
+                onCheckedChange={(checked) => setNotifications({ ...notifications, [key]: checked })}
+              />
             </div>
-            <Switch
-              checked={notifications.emailNotifications}
-              onCheckedChange={(checked) => setNotifications({ ...notifications, emailNotifications: checked })}
-            />
-          </div>
-          <div className="flex items-center justify-between border-b-2 border-foreground/20 pb-4">
-            <div>
-              <p className="font-bold">Event Reminders</p>
-              <p className="text-sm text-muted-foreground">Get notified before events you&apos;ve registered for</p>
-            </div>
-            <Switch
-              checked={notifications.eventReminders}
-              onCheckedChange={(checked) => setNotifications({ ...notifications, eventReminders: checked })}
-            />
-          </div>
-          <div className="flex items-center justify-between border-b-2 border-foreground/20 pb-4">
-            <div>
-              <p className="font-bold">Payment Alerts</p>
-              <p className="text-sm text-muted-foreground">Receive updates about your payments and refunds</p>
-            </div>
-            <Switch
-              checked={notifications.paymentAlerts}
-              onCheckedChange={(checked) => setNotifications({ ...notifications, paymentAlerts: checked })}
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-bold">Promotional Emails</p>
-              <p className="text-sm text-muted-foreground">Receive news and offers from event organizers</p>
-            </div>
-            <Switch
-              checked={notifications.promotionalEmails}
-              onCheckedChange={(checked) => setNotifications({ ...notifications, promotionalEmails: checked })}
-            />
-          </div>
+          ))}
         </div>
       </section>
     </div>

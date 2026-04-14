@@ -54,3 +54,6 @@ coverage/
 next-env.d.ts
 .vercel/
 ROUTES.md
+
+# local env
+.env.local

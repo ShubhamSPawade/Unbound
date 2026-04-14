@@ -141,6 +141,14 @@ public class ClubService {
     }
 
     @Transactional(readOnly = true)
+    public ClubResponse getMyClub() {
+        User currentUser = userService.getCurrentUser();
+        return clubRepository.findByCreatedBy(currentUser)
+                .map(this::toResponse)
+                .orElseThrow(() -> new ResourceNotFoundException("You have not registered a club yet"));
+    }
+
+    @Transactional(readOnly = true)
     public ClubResponse getClubById(Long id) {
         return toResponse(getActiveClubById(id));
     }

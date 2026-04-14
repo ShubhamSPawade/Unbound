@@ -1,6 +1,7 @@
 "use client"
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react"
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react"
+import { authApi, userApi, setAuthToken } from "./api"
 
 export type UserRole = "student" | "club" | "admin" | "superadmin"
 
@@ -12,14 +13,12 @@ export type User = {
   avatar?: string
   phone?: string
   department?: string
-  year?: string
-  clubName?: string
-  clubDescription?: string
   collegeName?: string
 }
 
 type AuthContextType = {
   user: User | null
+  token: string | null
   isLoading: boolean
   isAuthenticated: boolean
   login: (email: string, password: string) => Promise<void>
@@ -32,105 +31,140 @@ type SignupData = {
   name: string
   email: string
   password: string
-  role: UserRole
+  role: string
   phone?: string
   department?: string
-  year?: string
-  clubName?: string
+  collegeId?: number
+}
+
+// Map backend roles to frontend roles
+const mapRole = (backendRole: string): UserRole => {
+  const map: Record<string, UserRole> = {
+    STUDENT: "student",
+    CLUB_ADMIN: "club",
+    COLLEGE_ADMIN: "admin",
+    SUPER_ADMIN: "superadmin",
+  }
+  return map[backendRole] ?? "student"
+}
+
+// Map frontend roles to backend roles
+const mapRoleToBackend = (frontendRole: string): string => {
+  const map: Record<string, string> = {
+    student: "STUDENT",
+    club: "CLUB_ADMIN",
+    admin: "COLLEGE_ADMIN",
+    superadmin: "SUPER_ADMIN",
+  }
+  return map[frontendRole] ?? "STUDENT"
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-// Mock users — one per role
-const mockUsers: Record<string, User & { password: string }> = {
-  "student@unbound.com": {
-    id: "1",
-    name: "Alex Student",
-    email: "student@unbound.com",
-    password: "password",
-    role: "student",
-    phone: "+91 9876543210",
-    department: "Computer Science",
-    year: "3rd Year",
-  },
-  "club@unbound.com": {
-    id: "2",
-    name: "Tech Club",
-    email: "club@unbound.com",
-    password: "password",
-    role: "club",
-    clubName: "Coding Club",
-    clubDescription: "We build cool stuff with code!",
-  },
-  "admin@unbound.com": {
-    id: "3",
-    name: "Admin User",
-    email: "admin@unbound.com",
-    password: "password",
-    role: "admin",
-    phone: "+91 9876543211",
-    department: "Administration",
-    collegeName: "MITAOE",
-  },
-  "superadmin@unbound.com": {
-    id: "4",
-    name: "Super Admin",
-    email: "superadmin@unbound.com",
-    password: "password",
-    role: "superadmin",
-    phone: "+91 9876543212",
-    department: "University Administration",
-  },
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [token, setToken] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Restore session from localStorage on mount
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token")
+    const storedUser = localStorage.getItem("user")
+    if (storedToken && storedUser) {
+      setAuthToken(storedToken)
+      setToken(storedToken)
+      setUser(JSON.parse(storedUser))
+    }
+    setIsLoading(false)
+  }, [])
 
   const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    const mockUser = mockUsers[email]
-    if (mockUser && mockUser.password === password) {
-      const { password: _, ...userData } = mockUser
-      setUser(userData)
+    try {
+      const res = await authApi.login(email, password)
+      const { token: jwt, name, email: userEmail, role } = res.data.data
+
+      const mappedUser: User = {
+        id: "",
+        name,
+        email: userEmail,
+        role: mapRole(role),
+      }
+
+      // Set token immediately so subsequent API calls work
+      localStorage.setItem("token", jwt)
+      setAuthToken(jwt)
+      try {
+        const profileRes = await userApi.getMe()
+        const profile = profileRes.data.data
+        mappedUser.id = String(profile.id)
+        mappedUser.phone = profile.phone
+        mappedUser.department = profile.department
+        mappedUser.collegeName = profile.college
+      } catch {
+        // profile fetch failed — continue with basic info
+      }
+      localStorage.setItem("user", JSON.stringify(mappedUser))
+      setToken(jwt)
+      setUser(mappedUser)
+    } finally {
       setIsLoading(false)
-      return
     }
-    setIsLoading(false)
-    throw new Error("Invalid email or password")
   }, [])
 
   const signup = useCallback(async (data: SignupData) => {
     setIsLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    const newUser: User = {
-      id: Math.random().toString(36).substring(7),
-      name: data.name,
-      email: data.email,
-      role: data.role,
-      phone: data.phone,
-      department: data.department,
-      year: data.year,
-      clubName: data.clubName,
+    try {
+      const res = await authApi.register({
+        ...data,
+        role: mapRoleToBackend(data.role),
+      })
+      const { token: jwt, name, email, role } = res.data.data
+
+      const mappedUser: User = {
+        id: "",
+        name,
+        email,
+        role: mapRole(role),
+        phone: data.phone,
+        department: data.department,
+      }
+
+      localStorage.setItem("token", jwt)
+      localStorage.setItem("user", JSON.stringify(mappedUser))
+      setToken(jwt)
+      setUser(mappedUser)
+    } finally {
+      setIsLoading(false)
     }
-    setUser(newUser)
-    setIsLoading(false)
   }, [])
 
   const logout = useCallback(() => {
+    localStorage.removeItem("token")
+    localStorage.removeItem("user")
+    setAuthToken(null)
+    setToken(null)
     setUser(null)
   }, [])
 
   const updateProfile = useCallback(async (data: Partial<User>) => {
     setIsLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 500))
-    setUser((prev) => (prev ? { ...prev, ...data } : null))
-    setIsLoading(false)
-  }, [])
+    try {
+      await userApi.updateMe({
+        name: data.name,
+        phone: data.phone,
+        department: data.department,
+      })
+      const updated = { ...user, ...data } as User
+      localStorage.setItem("user", JSON.stringify(updated))
+      setUser(updated)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [user])
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, login, signup, logout, updateProfile }}>
+    <AuthContext.Provider value={{ user, token, isLoading, isAuthenticated: !!user, login, signup, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   )

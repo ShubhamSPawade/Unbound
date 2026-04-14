@@ -16,6 +16,7 @@ public class UserResponse {
     private String email;
     private String phone;
     private String college;
+    private Long collegeId;
     private String department;
     private Role role;
     private boolean isActive;

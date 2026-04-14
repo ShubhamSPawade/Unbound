@@ -17,6 +17,7 @@ import com.unbound.backend.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class EventService {
 
     private final EventRepository eventRepository;
@@ -68,6 +70,7 @@ public class EventService {
     }
 
     // POST /api/events
+    @Transactional
     public EventResponse createEvent(EventRequest request) {
         Fest fest = request.getFestId() != null ? getFest(request.getFestId()) : null;
         Club club = getClub(request.getClubId());
@@ -92,8 +95,16 @@ public class EventService {
     // GET /api/events with optional filters
     public List<EventResponse> getAllPublishedEvents(EventCategory category, Long clubId, Long festId,
             LocalDateTime from, LocalDateTime to) {
-        return eventRepository.filterPublishedEvents(category, clubId, festId, from, to)
-                .stream().map(this::toResponse).collect(Collectors.toList());
+        // Use findAllByStatus and filter in memory to avoid PostgreSQL null type inference issue
+        return eventRepository.findAllByStatusWithRelations(EventStatus.PUBLISHED)
+                .stream()
+                .filter(e -> category == null || e.getCategory() == category)
+                .filter(e -> clubId == null || e.getClub().getId().equals(clubId))
+                .filter(e -> festId == null || (e.getFest() != null && e.getFest().getId().equals(festId)))
+                .filter(e -> from == null || !e.getEventDate().isBefore(from))
+                .filter(e -> to == null || !e.getEventDate().isAfter(to))
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
     // GET /api/events/admin/all
@@ -115,7 +126,7 @@ public class EventService {
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
 
-    // GET /api/events/club/{clubId}
+    // GET /api/events/club/{clubId} — all statuses for club admin
     public List<EventResponse> getEventsByClub(Long clubId) {
         Club club = getClub(clubId);
         return eventRepository.findAllByClub(club)
@@ -123,6 +134,7 @@ public class EventService {
     }
 
     // PUT /api/events/{id}
+    @Transactional
     public EventResponse updateEvent(Long id, EventRequest request) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
@@ -142,6 +154,7 @@ public class EventService {
     }
 
     // PATCH /api/events/{id}/publish
+    @Transactional
     public EventResponse publishEvent(Long id) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
@@ -163,6 +176,7 @@ public class EventService {
     }
 
     // PATCH /api/events/{id}/cancel
+    @Transactional
     public EventResponse cancelEvent(Long id) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
@@ -185,6 +199,7 @@ public class EventService {
     }
 
     // DELETE /api/events/{id}
+    @Transactional
     public void deleteEvent(Long id) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));

@@ -54,6 +54,13 @@ public class ClubController {
         return ResponseEntity.ok(ApiResponse.success("Clubs fetched", clubService.getAllApprovedClubs()));
     }
 
+    @GetMapping("/my")
+    @Operation(summary = "Get current CLUB_ADMIN's own club")
+    @PreAuthorize("hasRole('CLUB_ADMIN')")
+    public ResponseEntity<ApiResponse<ClubResponse>> getMyClub() {
+        return ResponseEntity.ok(ApiResponse.success("Club fetched", clubService.getMyClub()));
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Get club by ID")
     public ResponseEntity<ApiResponse<ClubResponse>> getClubById(@PathVariable Long id) {

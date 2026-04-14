@@ -12,10 +12,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class FestService {
 
     private final FestRepository festRepository;
@@ -41,6 +44,7 @@ public class FestService {
     }
 
     // POST /api/fests
+    @Transactional
     public FestResponse createFest(FestRequest request) {
         if (request.getEndDate().isBefore(request.getStartDate())) {
             throw new BadRequestException("End date cannot be before start date");
@@ -84,6 +88,7 @@ public class FestService {
     }
 
     // PUT /api/fests/{id}
+    @Transactional
     public FestResponse updateFest(Long id, FestRequest request) {
         Fest fest = festRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Fest not found with id: " + id));
@@ -110,6 +115,7 @@ public class FestService {
     }
 
     // DELETE /api/fests/{id}
+    @Transactional
     public void deleteFest(Long id) {
         Fest fest = festRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Fest not found with id: " + id));

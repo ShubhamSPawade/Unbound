@@ -1,81 +1,87 @@
 "use client"
 
+import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
-import { Calendar, Users, TrendingUp, ArrowRight, PlusCircle, Eye } from "lucide-react"
+import { Calendar, Users, TrendingUp, PlusCircle, Eye } from "lucide-react"
 import { Button } from "@/components/ui/button"
-
-const stats = [
-  { label: "Total Events", value: "12", change: "+2 this month", icon: Calendar, color: "bg-primary" },
-  { label: "Total Registrations", value: "847", change: "+156 this week", icon: Users, color: "bg-secondary" },
-  { label: "Avg. Attendance", value: "89%", change: "+5% from last month", icon: TrendingUp, color: "bg-accent" },
-]
-
-const recentEvents = [
-  {
-    id: 1,
-    title: "Hackathon 2026",
-    date: "Apr 15, 2026",
-    registrations: 156,
-    capacity: 200,
-    status: "upcoming",
-  },
-  {
-    id: 2,
-    title: "Web Dev Bootcamp",
-    date: "May 10, 2026",
-    registrations: 45,
-    capacity: 50,
-    status: "upcoming",
-  },
-  {
-    id: 3,
-    title: "Code Sprint",
-    date: "Mar 20, 2026",
-    registrations: 78,
-    capacity: 80,
-    status: "completed",
-  },
-]
-
-const recentRegistrations = [
-  { name: "John Doe", event: "Hackathon 2026", time: "2 hours ago" },
-  { name: "Jane Smith", event: "Hackathon 2026", time: "3 hours ago" },
-  { name: "Mike Johnson", event: "Web Dev Bootcamp", time: "5 hours ago" },
-  { name: "Sarah Williams", event: "Hackathon 2026", time: "1 day ago" },
-]
+import { eventApi, registrationApi, clubApi } from "@/lib/api"
+import { useAuth } from "@/lib/auth-context"
+import { usePathname } from "next/navigation"
 
 export default function ClubDashboardPage() {
+  const { user } = useAuth()
+  const pathname = usePathname()
+  const [events, setEvents] = useState<any[]>([])
+  const [allEvents, setAllEvents] = useState<any[]>([])
+  const [allEventsCount, setAllEventsCount] = useState(0)
+  const [recentRegs, setRecentRegs] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  const fetchData = useCallback(async () => {
+    if (!user?.email) return
+    setIsLoading(true)
+    try {
+      const clubRes = await clubApi.getMyClub()
+      const myClub = clubRes.data.data
+      if (myClub) {
+        const eventsRes = await eventApi.getEventsByClub(myClub.id)
+        const allEventsData = eventsRes.data.data || []
+        setAllEventsCount(allEventsData.length)
+        setAllEvents(allEventsData)
+        setEvents(allEventsData.slice(0, 3))
+        const allRegs: any[] = []
+        await Promise.allSettled(
+          allEventsData.map(async (event: any) => {
+            try {
+              const regRes = await registrationApi.getRegistrationsByEvent(event.id)
+              allRegs.push(...(regRes.data.data || []))
+            } catch { /* ignore */ }
+          })
+        )
+        allRegs.sort((a, b) => new Date(b.registrationDate).getTime() - new Date(a.registrationDate).getTime())
+        setRecentRegs(allRegs.slice(0, 4))
+      }
+    } catch {
+      setEvents([])
+    } finally {
+      setIsLoading(false)
+    }
+  }, [user?.email])
+
+  // Re-fetch every time dashboard is visited (including after create)
+  useEffect(() => {
+    fetchData()
+  }, [fetchData, pathname])
+
+  const totalRegistrations = events.reduce((sum, e) => sum + (e.currentRegistrations || 0), 0)
+
   return (
     <div>
-      {/* Page Header */}
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="mb-2 text-3xl font-black md:text-4xl">Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back, Coding Club!</p>
+          <p className="text-muted-foreground">Welcome back, {user?.name}!</p>
         </div>
         <Link href="/club/create">
           <Button className="border-4 border-foreground bg-primary font-bold text-foreground shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-            <PlusCircle className="mr-2 h-5 w-5" />
-            Create Event
+            <PlusCircle className="mr-2 h-5 w-5" /> Create Event
           </Button>
         </Link>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats */}
       <div className="mb-8 grid gap-4 sm:grid-cols-3">
-        {stats.map((stat) => (
-          <div
-            key={stat.label}
-            className={`border-4 border-foreground ${stat.color} p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]`}
-          >
-            <div className="mb-4 flex items-center justify-between">
-              <div className="flex h-12 w-12 items-center justify-center border-4 border-foreground bg-card">
-                <stat.icon className="h-6 w-6" />
-              </div>
+        {[
+          { label: "Total Events", value: String(allEventsCount), icon: Calendar, color: "bg-primary" },
+          { label: "Total Registrations", value: String(totalRegistrations), icon: Users, color: "bg-secondary" },
+          { label: "Published Events", value: String(allEvents.filter(e => e.status === "PUBLISHED").length), icon: TrendingUp, color: "bg-accent" },
+        ].map((stat) => (
+          <div key={stat.label} className={`border-4 border-foreground ${stat.color} p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]`}>
+            <div className="mb-4 flex h-12 w-12 items-center justify-center border-4 border-foreground bg-card">
+              <stat.icon className="h-6 w-6" />
             </div>
-            <p className="mb-1 text-4xl font-black">{stat.value}</p>
+            <p className="mb-1 text-4xl font-black">{isLoading ? "—" : stat.value}</p>
             <p className="font-bold">{stat.label}</p>
-            <p className="mt-1 text-sm font-medium opacity-80">{stat.change}</p>
           </div>
         ))}
       </div>
@@ -85,91 +91,80 @@ export default function ClubDashboardPage() {
         <div className="border-4 border-foreground bg-card shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
           <div className="flex items-center justify-between border-b-4 border-foreground p-4">
             <h2 className="text-xl font-black">Recent Events</h2>
-            <Link href="/club/events" className="text-sm font-bold hover:underline">
-              View All
-            </Link>
+            <Link href="/club/events" className="text-sm font-bold hover:underline">View All</Link>
           </div>
-          <div className="divide-y-4 divide-foreground">
-            {recentEvents.map((event) => (
-              <div key={event.id} className="flex items-center justify-between p-4">
-                <div>
-                  <h3 className="font-bold">{event.title}</h3>
-                  <p className="text-sm text-muted-foreground">{event.date}</p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <p className="font-bold">{event.registrations}/{event.capacity}</p>
-                    <p className="text-xs text-muted-foreground">registrations</p>
+          {isLoading ? (
+            <div className="p-4 space-y-3">{[...Array(3)].map((_, i) => <div key={i} className="h-12 animate-pulse bg-muted" />)}</div>
+          ) : events.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground">No events yet. Create your first event!</div>
+          ) : (
+            <div className="divide-y-4 divide-foreground">
+              {events.map((event) => (
+                <div key={event.id} className="flex items-center justify-between p-4">
+                  <div>
+                    <h3 className="font-bold">{event.title}</h3>
+                    <p className="text-sm text-muted-foreground">{new Date(event.eventDate).toLocaleDateString()}</p>
                   </div>
-                  <span
-                    className={`border-2 border-foreground px-2 py-0.5 text-xs font-bold ${
-                      event.status === "upcoming" ? "bg-secondary" : "bg-muted"
-                    }`}
-                  >
-                    {event.status}
-                  </span>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <p className="font-bold">{event.currentRegistrations}/{event.maxParticipants}</p>
+                      <p className="text-xs text-muted-foreground">registrations</p>
+                    </div>
+                    <span className={`border-2 border-foreground px-2 py-0.5 text-xs font-bold ${event.status === "PUBLISHED" ? "bg-secondary" : event.status === "COMPLETED" ? "bg-muted" : "bg-accent"}`}>
+                      {event.status}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Recent Registrations */}
         <div className="border-4 border-foreground bg-card shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
           <div className="flex items-center justify-between border-b-4 border-foreground p-4">
             <h2 className="text-xl font-black">Recent Registrations</h2>
-            <Link href="/club/registrations" className="text-sm font-bold hover:underline">
-              View All
-            </Link>
+            <Link href="/club/registrations" className="text-sm font-bold hover:underline">View All</Link>
           </div>
-          <div className="divide-y-4 divide-foreground">
-            {recentRegistrations.map((reg, index) => (
-              <div key={index} className="flex items-center justify-between p-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center border-4 border-foreground bg-primary font-bold">
-                    {reg.name.charAt(0)}
+          {recentRegs.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground">No registrations yet.</div>
+          ) : (
+            <div className="divide-y-4 divide-foreground">
+              {recentRegs.map((reg) => (
+                <div key={reg.id} className="flex items-center justify-between p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center border-4 border-foreground bg-primary font-bold">
+                      {reg.userName?.charAt(0) || "?"}
+                    </div>
+                    <div>
+                      <p className="font-bold">{reg.userName}</p>
+                      <p className="text-sm text-muted-foreground">{reg.eventTitle}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-bold">{reg.name}</p>
-                    <p className="text-sm text-muted-foreground">{reg.event}</p>
-                  </div>
+                  <span className="text-sm text-muted-foreground capitalize">{reg.status?.toLowerCase()}</span>
                 </div>
-                <span className="text-sm text-muted-foreground">{reg.time}</span>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Quick Actions */}
       <div className="mt-8 border-4 border-foreground bg-secondary p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
         <h2 className="mb-4 text-xl font-black">Quick Actions</h2>
         <div className="flex flex-wrap gap-4">
           <Link href="/club/create">
-            <Button
-              variant="outline"
-              className="border-4 border-foreground bg-card font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-            >
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Create New Event
+            <Button variant="outline" className="border-4 border-foreground bg-card font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none">
+              <PlusCircle className="mr-2 h-4 w-4" /> Create New Event
             </Button>
           </Link>
           <Link href="/club/events">
-            <Button
-              variant="outline"
-              className="border-4 border-foreground bg-card font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-            >
-              <Eye className="mr-2 h-4 w-4" />
-              Manage Events
+            <Button variant="outline" className="border-4 border-foreground bg-card font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none">
+              <Eye className="mr-2 h-4 w-4" /> Manage Events
             </Button>
           </Link>
           <Link href="/club/registrations">
-            <Button
-              variant="outline"
-              className="border-4 border-foreground bg-card font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-            >
-              <Users className="mr-2 h-4 w-4" />
-              View Registrations
+            <Button variant="outline" className="border-4 border-foreground bg-card font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none">
+              <Users className="mr-2 h-4 w-4" /> View Registrations
             </Button>
           </Link>
         </div>
