@@ -1,294 +1,119 @@
 "use client"
 
-import { useState } from "react"
-import { User, Mail, Phone, Lock, Bell, Shield, Save, Camera, Database, Globe } from "lucide-react"
+import { useState, useEffect } from "react"
+import { User, Mail, Phone, Lock, Bell, Shield, Save } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/components/toast-provider"
+import { useAuth } from "@/lib/auth-context"
 
 export default function AdminSettingsPage() {
-  const { success } = useToast()
+  const { success, error } = useToast()
+  const { user, updateProfile } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
-  const [profileData, setProfileData] = useState({
-    name: "Admin User",
-    email: "admin@university.edu",
-    phone: "+91 9876543211",
-    department: "Administration",
-    role: "Super Admin",
-  })
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  })
-  const [platformSettings, setPlatformSettings] = useState({
-    maintenanceMode: false,
-    allowRegistrations: true,
-    requireApproval: true,
-    maxEventsPerClub: "10",
-    platformFeePercent: "2",
-  })
+  const [profileData, setProfileData] = useState({ name: "", email: "", phone: "", department: "" })
+  const [passwordData, setPasswordData] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" })
   const [notifications, setNotifications] = useState({
-    newClubRequests: true,
-    eventApprovals: true,
-    systemAlerts: true,
-    dailyReports: false,
+    newClubRequests: true, eventApprovals: true, systemAlerts: true, dailyReports: false,
   })
+
+  useEffect(() => {
+    if (user) {
+      setProfileData({ name: user.name || "", email: user.email || "", phone: user.phone || "", department: user.department || "" })
+    }
+  }, [user])
 
   const handleProfileSave = async () => {
     setIsLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    success("Profile Updated", "Your profile has been saved successfully")
-    setIsLoading(false)
+    try {
+      await updateProfile({ name: profileData.name, phone: profileData.phone, department: profileData.department })
+      success("Profile Updated", "Your profile has been saved successfully")
+    } catch { error("Error", "Failed to update profile") } finally { setIsLoading(false) }
   }
 
   const handlePasswordChange = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) return
     setIsLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    success("Password Changed", "Your password has been updated successfully")
-    setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
-    setIsLoading(false)
-  }
-
-  const handlePlatformSave = async () => {
-    setIsLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    success("Platform Settings Updated", "Changes have been applied successfully")
-    setIsLoading(false)
+    try {
+      await new Promise((r) => setTimeout(r, 500))
+      success("Password Changed", "Your password has been updated successfully")
+      setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
+    } catch { error("Error", "Failed to change password") } finally { setIsLoading(false) }
   }
 
   return (
     <div className="mx-auto max-w-3xl">
       <div className="mb-8">
         <h1 className="mb-2 text-3xl font-black md:text-4xl">Admin Settings</h1>
-        <p className="text-muted-foreground">Manage your account and platform settings</p>
+        <p className="text-muted-foreground">Manage your account settings</p>
       </div>
 
-      {/* Profile Section */}
+      {/* Profile */}
       <section className="mb-8 border-4 border-foreground bg-card shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
         <div className="border-b-4 border-foreground bg-muted p-4">
-          <h2 className="flex items-center gap-2 text-xl font-black">
-            <User className="h-5 w-5" />
-            Admin Profile
-          </h2>
+          <h2 className="flex items-center gap-2 text-xl font-black"><User className="h-5 w-5" />Admin Profile</h2>
         </div>
         <div className="p-6">
           <div className="mb-6 flex items-center gap-4">
-            <div className="relative">
-              <div className="flex h-20 w-20 items-center justify-center border-4 border-foreground bg-accent">
-                <Shield className="h-10 w-10" />
-              </div>
-              <button className="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center border-2 border-foreground bg-card hover:bg-muted">
-                <Camera className="h-4 w-4" />
-              </button>
+            <div className="flex h-20 w-20 items-center justify-center border-4 border-foreground bg-accent">
+              <Shield className="h-10 w-10" />
             </div>
             <div>
-              <p className="font-bold">{profileData.name}</p>
-              <p className="inline-block border-2 border-foreground bg-accent px-2 py-0.5 text-sm font-bold">
-                {profileData.role}
-              </p>
+              <p className="font-bold">{user?.name}</p>
+              <p className="inline-block border-2 border-foreground bg-accent px-2 py-0.5 text-sm font-bold capitalize">{user?.role}</p>
             </div>
           </div>
-
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <Label htmlFor="name" className="mb-2 flex items-center gap-2 font-bold">
-                <User className="h-4 w-4" />
-                Full Name
-              </Label>
-              <Input
-                id="name"
-                value={profileData.name}
-                onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-                className="border-4 border-foreground shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-              />
+              <Label htmlFor="name" className="mb-2 flex items-center gap-2 font-bold"><User className="h-4 w-4" />Full Name</Label>
+              <Input id="name" value={profileData.name} onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                className="border-4 border-foreground shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]" />
             </div>
             <div>
-              <Label htmlFor="email" className="mb-2 flex items-center gap-2 font-bold">
-                <Mail className="h-4 w-4" />
-                Email
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                value={profileData.email}
-                onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
-                className="border-4 border-foreground shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-              />
+              <Label htmlFor="email" className="mb-2 flex items-center gap-2 font-bold"><Mail className="h-4 w-4" />Email</Label>
+              <Input id="email" value={profileData.email} disabled className="border-4 border-foreground bg-muted" />
             </div>
             <div>
-              <Label htmlFor="phone" className="mb-2 flex items-center gap-2 font-bold">
-                <Phone className="h-4 w-4" />
-                Phone Number
-              </Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={profileData.phone}
-                onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
-                className="border-4 border-foreground shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-              />
+              <Label htmlFor="phone" className="mb-2 flex items-center gap-2 font-bold"><Phone className="h-4 w-4" />Phone</Label>
+              <Input id="phone" type="tel" value={profileData.phone} onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                className="border-4 border-foreground shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]" />
             </div>
             <div>
-              <Label htmlFor="role" className="mb-2 flex items-center gap-2 font-bold">
-                <Shield className="h-4 w-4" />
-                Role
-              </Label>
-              <Input
-                id="role"
-                value={profileData.role}
-                disabled
-                className="border-4 border-foreground bg-muted"
-              />
+              <Label htmlFor="dept" className="mb-2 flex items-center gap-2 font-bold"><Shield className="h-4 w-4" />Department</Label>
+              <Input id="dept" value={profileData.department} onChange={(e) => setProfileData({ ...profileData, department: e.target.value })}
+                className="border-4 border-foreground shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]" />
             </div>
           </div>
-
-          <Button
-            onClick={handleProfileSave}
-            disabled={isLoading}
-            className="mt-6 border-4 border-foreground bg-primary font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-          >
-            <Save className="mr-2 h-4 w-4" />
-            {isLoading ? "Saving..." : "Save Changes"}
+          <Button onClick={handleProfileSave} disabled={isLoading}
+            className="mt-6 border-4 border-foreground bg-primary font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none">
+            <Save className="mr-2 h-4 w-4" />{isLoading ? "Saving..." : "Save Changes"}
           </Button>
         </div>
       </section>
 
-      {/* Platform Settings */}
-      <section className="mb-8 border-4 border-foreground bg-card shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-        <div className="border-b-4 border-foreground bg-accent p-4">
-          <h2 className="flex items-center gap-2 text-xl font-black">
-            <Globe className="h-5 w-5" />
-            Platform Settings
-          </h2>
-        </div>
-        <div className="p-6">
-          <div className="mb-6 space-y-4">
-            <div className="flex items-center justify-between border-b-2 border-foreground/20 pb-4">
-              <div>
-                <p className="font-bold">Maintenance Mode</p>
-                <p className="text-sm text-muted-foreground">Temporarily disable the platform for updates</p>
-              </div>
-              <Switch
-                checked={platformSettings.maintenanceMode}
-                onCheckedChange={(checked) => setPlatformSettings({ ...platformSettings, maintenanceMode: checked })}
-              />
-            </div>
-            <div className="flex items-center justify-between border-b-2 border-foreground/20 pb-4">
-              <div>
-                <p className="font-bold">Allow New Registrations</p>
-                <p className="text-sm text-muted-foreground">Allow new students and clubs to register</p>
-              </div>
-              <Switch
-                checked={platformSettings.allowRegistrations}
-                onCheckedChange={(checked) => setPlatformSettings({ ...platformSettings, allowRegistrations: checked })}
-              />
-            </div>
-            <div className="flex items-center justify-between border-b-2 border-foreground/20 pb-4">
-              <div>
-                <p className="font-bold">Require Event Approval</p>
-                <p className="text-sm text-muted-foreground">Events need admin approval before publishing</p>
-              </div>
-              <Switch
-                checked={platformSettings.requireApproval}
-                onCheckedChange={(checked) => setPlatformSettings({ ...platformSettings, requireApproval: checked })}
-              />
-            </div>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <Label htmlFor="maxEvents" className="mb-2 block font-bold">
-                Max Events Per Club
-              </Label>
-              <Input
-                id="maxEvents"
-                type="number"
-                value={platformSettings.maxEventsPerClub}
-                onChange={(e) => setPlatformSettings({ ...platformSettings, maxEventsPerClub: e.target.value })}
-                className="border-4 border-foreground shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-              />
-            </div>
-            <div>
-              <Label htmlFor="platformFee" className="mb-2 block font-bold">
-                Platform Fee (%)
-              </Label>
-              <Input
-                id="platformFee"
-                type="number"
-                value={platformSettings.platformFeePercent}
-                onChange={(e) => setPlatformSettings({ ...platformSettings, platformFeePercent: e.target.value })}
-                className="border-4 border-foreground shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-              />
-            </div>
-          </div>
-
-          <Button
-            onClick={handlePlatformSave}
-            disabled={isLoading}
-            className="mt-6 border-4 border-foreground bg-accent font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-          >
-            <Database className="mr-2 h-4 w-4" />
-            Save Platform Settings
-          </Button>
-        </div>
-      </section>
-
-      {/* Password Section */}
+      {/* Password */}
       <section className="mb-8 border-4 border-foreground bg-card shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
         <div className="border-b-4 border-foreground bg-muted p-4">
-          <h2 className="flex items-center gap-2 text-xl font-black">
-            <Lock className="h-5 w-5" />
-            Change Password
-          </h2>
+          <h2 className="flex items-center gap-2 text-xl font-black"><Lock className="h-5 w-5" />Change Password</h2>
         </div>
         <div className="space-y-4 p-6">
-          <div>
-            <Label htmlFor="currentPassword" className="mb-2 block font-bold">
-              Current Password
-            </Label>
-            <Input
-              id="currentPassword"
-              type="password"
-              value={passwordData.currentPassword}
-              onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-              className="border-4 border-foreground shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-            />
-          </div>
-          <div>
-            <Label htmlFor="newPassword" className="mb-2 block font-bold">
-              New Password
-            </Label>
-            <Input
-              id="newPassword"
-              type="password"
-              value={passwordData.newPassword}
-              onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-              className="border-4 border-foreground shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-            />
-          </div>
-          <div>
-            <Label htmlFor="confirmPassword" className="mb-2 block font-bold">
-              Confirm New Password
-            </Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              value={passwordData.confirmPassword}
-              onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-              className="border-4 border-foreground shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-            />
-          </div>
-          <Button
-            onClick={handlePasswordChange}
+          {["currentPassword", "newPassword", "confirmPassword"].map((field) => (
+            <div key={field}>
+              <Label htmlFor={field} className="mb-2 block font-bold capitalize">{field.replace(/([A-Z])/g, " $1")}</Label>
+              <Input id={field} type="password" value={passwordData[field as keyof typeof passwordData]}
+                onChange={(e) => setPasswordData({ ...passwordData, [field]: e.target.value })}
+                className="border-4 border-foreground shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]" />
+            </div>
+          ))}
+          {passwordData.newPassword && passwordData.confirmPassword && passwordData.newPassword !== passwordData.confirmPassword && (
+            <p className="text-sm font-bold text-destructive">Passwords do not match</p>
+          )}
+          <Button onClick={handlePasswordChange}
             disabled={isLoading || !passwordData.currentPassword || !passwordData.newPassword || passwordData.newPassword !== passwordData.confirmPassword}
-            className="border-4 border-foreground bg-primary font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none disabled:opacity-50"
-          >
-            <Lock className="mr-2 h-4 w-4" />
-            Update Password
+            className="border-4 border-foreground bg-primary font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none disabled:opacity-50">
+            <Lock className="mr-2 h-4 w-4" />Update Password
           </Button>
         </div>
       </section>
@@ -296,52 +121,21 @@ export default function AdminSettingsPage() {
       {/* Notifications */}
       <section className="border-4 border-foreground bg-card shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
         <div className="border-b-4 border-foreground bg-muted p-4">
-          <h2 className="flex items-center gap-2 text-xl font-black">
-            <Bell className="h-5 w-5" />
-            Admin Notifications
-          </h2>
+          <h2 className="flex items-center gap-2 text-xl font-black"><Bell className="h-5 w-5" />Admin Notifications</h2>
         </div>
         <div className="space-y-4 p-6">
-          <div className="flex items-center justify-between border-b-2 border-foreground/20 pb-4">
-            <div>
-              <p className="font-bold">New Club Requests</p>
-              <p className="text-sm text-muted-foreground">Get notified when new clubs request approval</p>
+          {[
+            { key: "newClubRequests", label: "New Club Requests", desc: "Get notified when new clubs request approval" },
+            { key: "eventApprovals", label: "Event Approvals", desc: "Notify when events are pending approval" },
+            { key: "systemAlerts", label: "System Alerts", desc: "Critical system alerts and security notifications" },
+            { key: "dailyReports", label: "Daily Reports", desc: "Receive daily summary reports via email" },
+          ].map(({ key, label, desc }, i, arr) => (
+            <div key={key} className={`flex items-center justify-between ${i < arr.length - 1 ? "border-b-2 border-foreground/20 pb-4" : ""}`}>
+              <div><p className="font-bold">{label}</p><p className="text-sm text-muted-foreground">{desc}</p></div>
+              <Switch checked={notifications[key as keyof typeof notifications]}
+                onCheckedChange={(checked) => setNotifications({ ...notifications, [key]: checked })} />
             </div>
-            <Switch
-              checked={notifications.newClubRequests}
-              onCheckedChange={(checked) => setNotifications({ ...notifications, newClubRequests: checked })}
-            />
-          </div>
-          <div className="flex items-center justify-between border-b-2 border-foreground/20 pb-4">
-            <div>
-              <p className="font-bold">Event Approvals</p>
-              <p className="text-sm text-muted-foreground">Notify when events are pending approval</p>
-            </div>
-            <Switch
-              checked={notifications.eventApprovals}
-              onCheckedChange={(checked) => setNotifications({ ...notifications, eventApprovals: checked })}
-            />
-          </div>
-          <div className="flex items-center justify-between border-b-2 border-foreground/20 pb-4">
-            <div>
-              <p className="font-bold">System Alerts</p>
-              <p className="text-sm text-muted-foreground">Critical system alerts and security notifications</p>
-            </div>
-            <Switch
-              checked={notifications.systemAlerts}
-              onCheckedChange={(checked) => setNotifications({ ...notifications, systemAlerts: checked })}
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-bold">Daily Reports</p>
-              <p className="text-sm text-muted-foreground">Receive daily summary reports via email</p>
-            </div>
-            <Switch
-              checked={notifications.dailyReports}
-              onCheckedChange={(checked) => setNotifications({ ...notifications, dailyReports: checked })}
-            />
-          </div>
+          ))}
         </div>
       </section>
     </div>

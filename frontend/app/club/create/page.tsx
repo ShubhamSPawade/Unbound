@@ -11,9 +11,11 @@ import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { FieldError } from "@/components/field-error"
 import { useToast } from "@/components/toast-provider"
+import { eventApi, clubApi, festApi } from "@/lib/api"
+import { useAuth } from "@/lib/auth-context"
+import { useEffect } from "react"
 
-const categories = ["Technical", "Cultural", "Arts", "Sports", "Workshop", "Seminar"]
-const fests = ["None", "TechFest 2026", "CultFest 2026", "SportsFest 2026"]
+const categories = ["TECHNICAL", "CULTURAL", "SPORTS", "WORKSHOP", "SEMINAR", "HACKATHON", "OTHER"]
 
 type FormData = {
   title: string
@@ -47,14 +49,31 @@ function validate(data: FormData, isPaid: boolean): FormErrors {
 
 export default function CreateEventPage() {
   const router = useRouter()
-  const { success } = useToast()
+  const { success, error } = useToast()
+  const { user } = useAuth()
   const [isPaid, setIsPaid] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
+  const [myClubId, setMyClubId] = useState<number | null>(null)
+  const [fests, setFests] = useState<any[]>([])
   const [formData, setFormData] = useState<FormData>({
-    title: "", category: "", fest: "None", date: "", time: "",
+    title: "", category: "", fest: "none", date: "", time: "",
     venue: "", description: "", capacity: "", price: "", eligibility: "",
   })
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const clubRes = await clubApi.getMyClub()
+        setMyClubId(clubRes.data.data?.id || null)
+      } catch { /* no club yet */ }
+      try {
+        const festRes = await festApi.getAllFests()
+        setFests(festRes.data.data || [])
+      } catch { /* ignore */ }
+    }
+    load()
+  }, [])
 
   const update = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -64,14 +83,31 @@ export default function CreateEventPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const errs = validate(formData, isPaid)
-    if (Object.keys(errs).length > 0) {
-      setErrors(errs)
-      return
-    }
+    if (Object.keys(errs).length > 0) { setErrors(errs); return }
+    if (!myClubId) { error("Error", "You don't have a registered club yet"); return }
+
     setIsSubmitting(true)
-    await new Promise((r) => setTimeout(r, 800))
-    success("Event Created", `"${formData.title}" has been created successfully`)
-    router.push("/club/events")
+    try {
+      const eventDate = `${formData.date}T${formData.time}:00`
+      await eventApi.createEvent({
+        title: formData.title,
+        description: formData.description,
+        venue: formData.venue,
+        eventDate,
+        maxParticipants: Number(formData.capacity),
+        category: formData.category,
+        feeAmount: isPaid ? Number(formData.price) : 0,
+        clubId: myClubId,
+        festId: formData.fest !== "none" ? Number(formData.fest) : undefined,
+      })
+      success("Event Created", `"${formData.title}" has been created successfully`)
+      router.push("/club/events")
+      router.refresh()
+    } catch (err: any) {
+      error("Error", err?.response?.data?.message || "Failed to create event")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const inputClass = (field: keyof FormData) =>
@@ -81,8 +117,8 @@ export default function CreateEventPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <Link href="/club" className="mb-6 inline-flex items-center gap-2 font-bold hover:underline">
-        <ArrowLeft className="h-4 w-4" /> Back to Dashboard
+      <Link href="/club/events" className="mb-6 inline-flex items-center gap-2 font-bold hover:underline">
+        <ArrowLeft className="h-4 w-4" /> Back to Events
       </Link>
 
       <div className="border-4 border-foreground bg-card p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] md:p-8">
@@ -124,13 +160,10 @@ export default function CreateEventPage() {
               </div>
               <div>
                 <Label htmlFor="fest" className="mb-2 block font-bold">Part of Fest</Label>
-                <select
-                  id="fest"
-                  value={formData.fest}
-                  onChange={(e) => update("fest", e.target.value)}
-                  className="w-full border-4 border-foreground bg-background px-4 py-3 font-medium shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-                >
-                  {fests.map((f) => <option key={f} value={f}>{f}</option>)}
+                <select id="fest" value={formData.fest} onChange={(e) => update("fest", e.target.value)}
+                  className="w-full border-4 border-foreground bg-background px-4 py-3 font-medium shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                  <option value="none">None (Standalone Event)</option>
+                  {fests.map((f: any) => <option key={f.id} value={String(f.id)}>{f.name}</option>)}
                 </select>
               </div>
             </div>
@@ -265,12 +298,8 @@ export default function CreateEventPage() {
           </div>
 
           <div className="flex gap-4 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.back()}
-              className="border-4 border-foreground font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-            >
+            <Button type="button" variant="outline" onClick={() => router.push("/club/events")}
+              className="border-4 border-foreground font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none">
               Cancel
             </Button>
             <Button

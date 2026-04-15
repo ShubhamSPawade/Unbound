@@ -2,12 +2,13 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { usePathname } from "next/navigation"
-import { Sparkles, Menu, X, Search, User, Home, Calendar, Users, Settings, LogOut, PlusCircle, BarChart3, Building2, Flag, CreditCard, Sun, Moon, Infinity } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import { Menu, X, Search, User, Home, Calendar, Users, Settings, LogOut, PlusCircle, BarChart3, Building2, Flag, CreditCard, Sun, Moon, Infinity } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Input } from "@/components/ui/input"
 import { NotificationPanel } from "@/components/notification-panel"
 import { cn } from "@/lib/utils"
+import { useAuth } from "@/lib/auth-context"
 
 type NavItem = {
   label: string
@@ -17,7 +18,6 @@ type NavItem = {
 
 type HeaderProps = {
   role: "student" | "club" | "admin"
-  userName?: string
 }
 
 const studentNav: NavItem[] = [
@@ -50,12 +50,20 @@ const navMap = {
   admin: adminNav,
 }
 
-export function DashboardHeader({ role, userName = "User" }: HeaderProps) {
+export function DashboardHeader({ role }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
   const navItems = navMap[role]
   const { theme, setTheme } = useTheme()
+  const { user, logout } = useAuth()
+  const userName = user?.name || "User"
+
+  const handleLogout = () => {
+    logout()
+    router.push("/login")
+  }
 
   return (
     <>
@@ -191,13 +199,13 @@ export function DashboardHeader({ role, userName = "User" }: HeaderProps) {
               </nav>
 
               <div className="border-t-4 border-foreground p-4">
-                <Link
-                  href="/login"
-                  className="flex items-center gap-3 border-4 border-foreground bg-card px-4 py-3 font-bold transition-all hover:bg-destructive hover:text-destructive-foreground"
+                <button
+                  onClick={handleLogout}
+                  className="flex w-full items-center gap-3 border-4 border-foreground bg-card px-4 py-3 font-bold transition-all hover:bg-destructive hover:text-destructive-foreground"
                 >
                   <LogOut className="h-5 w-5" />
                   Logout
-                </Link>
+                </button>
               </div>
             </div>
           </div>

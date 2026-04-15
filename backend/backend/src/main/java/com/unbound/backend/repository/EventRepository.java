@@ -45,7 +45,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
            "WHERE e.fest = :fest AND e.status = :status")
     List<Event> findAllByFestAndStatusWithRelations(@Param("fest") Fest fest, @Param("status") EventStatus status);
 
-    // Original methods for backward compatibility
     List<Event> findAllByFest(Fest fest);
     List<Event> findAllByClub(Club club);
     List<Event> findAllByStatus(EventStatus status);

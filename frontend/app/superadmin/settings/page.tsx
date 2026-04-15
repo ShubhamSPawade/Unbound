@@ -1,41 +1,37 @@
 "use client"
 
-import { useState } from "react"
-import { User, Mail, Phone, Lock, Bell, Shield, Save, Camera, Globe, Database } from "lucide-react"
+import { useState, useEffect } from "react"
+import { User, Mail, Phone, Lock, Bell, Shield, Save, Globe, Database } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/components/toast-provider"
+import { useAuth } from "@/lib/auth-context"
 
 export default function SuperAdminSettingsPage() {
-  const { success } = useToast()
+  const { success, error } = useToast()
+  const { user, updateProfile } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
-  const [profile, setProfile] = useState({
-    name: "Super Admin",
-    email: "superadmin@unbound.com",
-    phone: "+91 9876543212",
-    department: "University Administration",
-  })
+  const [profile, setProfile] = useState({ name: "", email: "", phone: "", department: "" })
   const [passwords, setPasswords] = useState({ current: "", next: "", confirm: "" })
   const [platform, setPlatform] = useState({
-    allowNewColleges: true,
-    requireCollegeApproval: true,
-    maintenanceMode: false,
-    maxCollegesPerAdmin: "3",
+    allowNewColleges: true, requireCollegeApproval: true, maintenanceMode: false, maxCollegesPerAdmin: "3",
   })
   const [notifications, setNotifications] = useState({
-    newCollegeRequests: true,
-    adminActivity: true,
-    systemAlerts: true,
-    weeklyReports: true,
+    newCollegeRequests: true, adminActivity: true, systemAlerts: true, weeklyReports: true,
   })
 
-  const save = async (msg: string) => {
+  useEffect(() => {
+    if (user) setProfile({ name: user.name || "", email: user.email || "", phone: user.phone || "", department: user.department || "" })
+  }, [user])
+
+  const handleProfileSave = async () => {
     setIsLoading(true)
-    await new Promise((r) => setTimeout(r, 800))
-    success("Saved", msg)
-    setIsLoading(false)
+    try {
+      await updateProfile({ name: profile.name, phone: profile.phone, department: profile.department })
+      success("Saved", "Profile updated successfully")
+    } catch { error("Error", "Failed to update profile") } finally { setIsLoading(false) }
   }
 
   const inputCls = "border-4 border-foreground shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
@@ -54,16 +50,11 @@ export default function SuperAdminSettingsPage() {
         </div>
         <div className="p-6">
           <div className="mb-6 flex items-center gap-4">
-            <div className="relative">
-              <div className="flex h-20 w-20 items-center justify-center border-4 border-foreground bg-accent">
-                <Shield className="h-10 w-10" />
-              </div>
-              <button className="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center border-2 border-foreground bg-card hover:bg-muted">
-                <Camera className="h-4 w-4" />
-              </button>
+            <div className="flex h-20 w-20 items-center justify-center border-4 border-foreground bg-accent">
+              <Shield className="h-10 w-10" />
             </div>
             <div>
-              <p className="font-bold">{profile.name}</p>
+              <p className="font-bold">{user?.name}</p>
               <span className="border-2 border-foreground bg-accent px-2 py-0.5 text-sm font-bold">Super Admin</span>
             </div>
           </div>
@@ -80,7 +71,7 @@ export default function SuperAdminSettingsPage() {
               </div>
             ))}
           </div>
-          <Button onClick={() => save("Profile updated successfully")} disabled={isLoading} className="mt-6 border-4 border-foreground bg-primary font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none">
+          <Button onClick={handleProfileSave} disabled={isLoading} className="mt-6 border-4 border-foreground bg-primary font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none">
             <Save className="mr-2 h-4 w-4" />{isLoading ? "Saving..." : "Save Changes"}
           </Button>
         </div>
@@ -108,7 +99,7 @@ export default function SuperAdminSettingsPage() {
             <Label htmlFor="maxColleges" className="mb-2 block font-bold">Max Colleges per Admin</Label>
             <Input id="maxColleges" type="number" value={platform.maxCollegesPerAdmin} onChange={(e) => setPlatform({ ...platform, maxCollegesPerAdmin: e.target.value })} className={`max-w-xs ${inputCls}`} />
           </div>
-          <Button onClick={() => save("Platform settings updated")} disabled={isLoading} className="mt-6 border-4 border-foreground bg-accent font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none">
+          <Button onClick={() => success("Saved", "Platform settings updated")} disabled={isLoading} className="mt-6 border-4 border-foreground bg-accent font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none">
             <Database className="mr-2 h-4 w-4" />Save Platform Settings
           </Button>
         </div>
@@ -131,7 +122,7 @@ export default function SuperAdminSettingsPage() {
             </div>
           ))}
           <Button
-            onClick={() => { save("Password updated successfully"); setPasswords({ current: "", next: "", confirm: "" }) }}
+            onClick={() => { success("Saved", "Password updated successfully"); setPasswords({ current: "", next: "", confirm: "" }) }}
             disabled={isLoading || !passwords.current || !passwords.next || passwords.next !== passwords.confirm}
             className="border-4 border-foreground bg-primary font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none disabled:opacity-50"
           >

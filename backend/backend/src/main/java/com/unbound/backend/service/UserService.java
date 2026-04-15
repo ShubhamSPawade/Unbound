@@ -9,12 +9,14 @@ import com.unbound.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserService {
 
     private final UserRepository userRepository;
@@ -34,6 +36,7 @@ public class UserService {
                 .email(user.getEmail())
                 .phone(user.getPhone())
                 .college(user.getCollege() != null ? user.getCollege().getName() : null)
+                .collegeId(user.getCollege() != null ? user.getCollege().getId() : null)
                 .department(user.getDepartment())
                 .role(user.getRole())
                 .isActive(user.isActive())
@@ -48,6 +51,7 @@ public class UserService {
     }
 
     // PUT /api/users/me
+    @Transactional
     public UserResponse updateMyProfile(UpdateProfileRequest request) {
         User user = getCurrentUser();
 
@@ -80,6 +84,7 @@ public class UserService {
     }
 
     // DELETE /api/users/{id} — soft delete, ADMIN only
+    @Transactional
     public void deactivateUser(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
