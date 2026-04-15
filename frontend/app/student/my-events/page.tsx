@@ -28,7 +28,8 @@ export default function MyEventsPage() {
     fetchRegistrations()
   }, [])
 
-  const getStatus = (eventDate: string) => {
+  const getStatus = (eventDate: string | null) => {
+    if (!eventDate) return "upcoming" // default to upcoming if no date
     return new Date(eventDate) > new Date() ? "upcoming" : "completed"
   }
 

@@ -26,6 +26,7 @@ public class Fest {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(columnDefinition = "TEXT")
     private String bannerUrl;
 
     @Column(nullable = false)

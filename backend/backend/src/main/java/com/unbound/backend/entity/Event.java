@@ -28,6 +28,7 @@ public class Event {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(columnDefinition = "TEXT")
     private String bannerUrl;
 
     private String venue;

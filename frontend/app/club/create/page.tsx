@@ -14,6 +14,7 @@ import { useToast } from "@/components/toast-provider"
 import { eventApi, clubApi, festApi } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
 import { useEffect } from "react"
+import { ImageUpload } from "@/components/image-upload"
 
 const categories = ["TECHNICAL", "CULTURAL", "SPORTS", "WORKSHOP", "SEMINAR", "HACKATHON", "OTHER"]
 
@@ -28,6 +29,7 @@ type FormData = {
   capacity: string
   price: string
   eligibility: string
+  bannerUrl: string
 }
 
 type FormErrors = Partial<Record<keyof FormData, string>>
@@ -58,7 +60,7 @@ export default function CreateEventPage() {
   const [fests, setFests] = useState<any[]>([])
   const [formData, setFormData] = useState<FormData>({
     title: "", category: "", fest: "none", date: "", time: "",
-    venue: "", description: "", capacity: "", price: "", eligibility: "",
+    venue: "", description: "", capacity: "", price: "", eligibility: "", bannerUrl: "",
   })
 
   useEffect(() => {
@@ -92,6 +94,7 @@ export default function CreateEventPage() {
       await eventApi.createEvent({
         title: formData.title,
         description: formData.description,
+        bannerUrl: formData.bannerUrl || undefined,
         venue: formData.venue,
         eventDate,
         maxParticipants: Number(formData.capacity),
@@ -282,6 +285,13 @@ export default function CreateEventPage() {
           {/* Additional Info */}
           <div className="space-y-4">
             <h2 className="border-b-4 border-foreground pb-2 text-xl font-black">Additional Information</h2>
+            <div>
+              <ImageUpload
+                value={formData.bannerUrl}
+                onChange={(url) => update("bannerUrl", url)}
+                label="Banner Image"
+              />
+            </div>
             <div>
               <Label htmlFor="eligibility" className="mb-2 block font-bold">
                 <FileText className="mr-2 inline h-4 w-4" />Eligibility Criteria

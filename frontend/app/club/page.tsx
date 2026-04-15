@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
-import { Calendar, Users, TrendingUp, PlusCircle, Eye } from "lucide-react"
+import { Calendar, Users, TrendingUp, PlusCircle, Eye, Building2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { eventApi, registrationApi, clubApi } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
@@ -16,6 +16,7 @@ export default function ClubDashboardPage() {
   const [allEventsCount, setAllEventsCount] = useState(0)
   const [recentRegs, setRecentRegs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [hasClub, setHasClub] = useState<boolean | null>(null) // null = loading
 
   const fetchData = useCallback(async () => {
     if (!user?.email) return
@@ -24,6 +25,7 @@ export default function ClubDashboardPage() {
       const clubRes = await clubApi.getMyClub()
       const myClub = clubRes.data.data
       if (myClub) {
+        setHasClub(true)
         const eventsRes = await eventApi.getEventsByClub(myClub.id)
         const allEventsData = eventsRes.data.data || []
         setAllEventsCount(allEventsData.length)
@@ -40,8 +42,11 @@ export default function ClubDashboardPage() {
         )
         allRegs.sort((a, b) => new Date(b.registrationDate).getTime() - new Date(a.registrationDate).getTime())
         setRecentRegs(allRegs.slice(0, 4))
+      } else {
+        setHasClub(false)
       }
     } catch {
+      setHasClub(false)
       setEvents([])
     } finally {
       setIsLoading(false)
@@ -54,6 +59,28 @@ export default function ClubDashboardPage() {
   }, [fetchData, pathname])
 
   const totalRegistrations = events.reduce((sum, e) => sum + (e.currentRegistrations || 0), 0)
+
+  // Show register club prompt if no club exists
+  if (!isLoading && hasClub === false) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="max-w-md border-4 border-foreground bg-card p-8 text-center shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+          <div className="mb-6 flex h-20 w-20 items-center justify-center border-4 border-foreground bg-secondary mx-auto">
+            <Building2 className="h-10 w-10" />
+          </div>
+          <h2 className="mb-3 text-2xl font-black">No Club Registered</h2>
+          <p className="mb-6 text-muted-foreground">
+            You haven't registered a club yet. Register your club to start creating events and managing registrations.
+          </p>
+          <Link href="/club/register">
+            <Button className="w-full border-4 border-foreground bg-primary font-bold text-foreground shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+              <PlusCircle className="mr-2 h-5 w-5" /> Register Your Club
+            </Button>
+          </Link>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div>
