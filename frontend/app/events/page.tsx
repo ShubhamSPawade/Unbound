@@ -109,8 +109,12 @@ export default function EventsPage() {
                 const isPaid = event.feeAmount && event.feeAmount > 0
                 return (
                   <div key={event.id} className="group border-4 border-foreground bg-card shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-                    <div className="aspect-video border-b-4 border-foreground bg-muted flex items-center justify-center">
-                      <Calendar className="h-12 w-12 text-muted-foreground/40" />
+                    <div className="aspect-video border-b-4 border-foreground bg-muted flex items-center justify-center overflow-hidden">
+                      {event.bannerUrl ? (
+                        <img src={event.bannerUrl} alt={event.title} className="h-full w-full object-cover" />
+                      ) : (
+                        <Calendar className="h-12 w-12 text-muted-foreground/40" />
+                      )}
                     </div>
                     <div className="p-5">
                       <div className="mb-3 flex flex-wrap gap-2">

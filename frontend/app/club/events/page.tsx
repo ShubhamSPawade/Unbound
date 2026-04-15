@@ -149,7 +149,7 @@ export default function ClubEventsPage() {
                           <Button variant="outline" size="sm" className="border-4 border-foreground"><MoreVertical className="h-4 w-4" /></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="border-4 border-foreground">
-                          <DropdownMenuItem asChild><Link href={`/events/${event.id}`}><Eye className="mr-2 h-4 w-4" /> View</Link></DropdownMenuItem>
+                          <DropdownMenuItem asChild><Link href={`/club/events/${event.id}/view`}><Eye className="mr-2 h-4 w-4" /> View</Link></DropdownMenuItem>
                           <DropdownMenuItem asChild><Link href={`/club/events/${event.id}/edit`}><Edit className="mr-2 h-4 w-4" /> Edit</Link></DropdownMenuItem>
                           {event.status === "DRAFT" && (
                             <DropdownMenuItem onClick={() => handlePublish(event.id)}>Publish</DropdownMenuItem>

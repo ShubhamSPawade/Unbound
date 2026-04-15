@@ -37,6 +37,14 @@ export default function AdminEventsPage() {
     } catch (err: any) { error("Error", err?.response?.data?.message || "Failed to cancel") }
   }
 
+  const handlePublish = async (id: number) => {
+    try {
+      await eventApi.publishEvent(id)
+      setEvents((prev) => prev.map((e) => e.id === id ? { ...e, status: "PUBLISHED" } : e))
+      success("Published", "Event is now live")
+    } catch (err: any) { error("Error", err?.response?.data?.message || "Failed to publish") }
+  }
+
   const filtered = events.filter((e) => {
     const statusMatch = statusFilter === "all" || e.status === statusFilter
     const searchMatch = e.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -125,7 +133,10 @@ export default function AdminEventsPage() {
                           <Button variant="outline" size="sm" className="border-4 border-foreground"><MoreVertical className="h-4 w-4" /></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="border-4 border-foreground">
-                          <DropdownMenuItem asChild><Link href={`/events/${event.id}`}><Eye className="mr-2 h-4 w-4" /> View</Link></DropdownMenuItem>
+                          <DropdownMenuItem asChild><Link href={`/admin/events/${event.id}`}><Eye className="mr-2 h-4 w-4" /> View</Link></DropdownMenuItem>
+                          {event.status === "DRAFT" && (
+                            <DropdownMenuItem onClick={() => handlePublish(event.id)}>Publish Event</DropdownMenuItem>
+                          )}
                           {event.status !== "CANCELLED" && (
                             <DropdownMenuItem onClick={() => handleCancel(event.id)} className="text-destructive">Cancel Event</DropdownMenuItem>
                           )}

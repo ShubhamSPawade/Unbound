@@ -26,6 +26,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   const [isPaid, setIsPaid] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [myClubId, setMyClubId] = useState<number | null>(null)
   const [fests, setFests] = useState<any[]>([])
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -62,8 +63,11 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
         const festRes = await festApi.getAllFests()
         setFests(festRes.data.data || [])
-      } catch {
-        error("Error", "Failed to load event")
+      } catch (err: any) {
+        setLoadError(true)
+        error("Error", err?.response?.status === 404 ? "Event not found" : "Failed to load event")
+        // Redirect to events list after a short delay
+        setTimeout(() => router.push("/club/events"), 1500)
       } finally {
         setIsLoading(false)
       }
@@ -117,6 +121,8 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     `border-4 bg-background px-4 py-5 font-medium shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] placeholder:text-muted-foreground ${errors[field] ? "border-destructive" : "border-foreground"}`
 
   if (isLoading) return <div className="h-96 animate-pulse border-4 border-foreground bg-muted mx-auto max-w-3xl" />
+
+  if (loadError) return null
 
   return (
     <div className="mx-auto max-w-3xl">

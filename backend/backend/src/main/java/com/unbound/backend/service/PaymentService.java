@@ -119,6 +119,18 @@ public class PaymentService {
                     .build();
 
             Payment savedPayment = paymentRepository.save(payment);
+
+            // Create PENDING registration — will be CONFIRMED after payment verification
+            if (!registrationRepository.existsByUserAndEvent(currentUser, event)) {
+                Registration pendingReg = Registration.builder()
+                        .user(currentUser)
+                        .event(event)
+                        .status(RegistrationStatus.PENDING)
+                        .build();
+                registrationRepository.save(pendingReg);
+                log.info("Pending registration created for user {} and event {}", currentUser.getId(), eventId);
+            }
+
             log.info("Payment order created successfully. Order ID: {}", savedPayment.getRazorpayOrderId());
 
             return toResponse(savedPayment);
