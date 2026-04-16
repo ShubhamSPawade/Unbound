@@ -19,6 +19,7 @@ public class CorsConfig {
                 "http://localhost:3000",
                 "http://localhost:3001",
                 "https://unbound.vercel.app",
+                "https://unbound-roan.vercel.app",
                 "https://unbound.up.railway.app"
         ));
 
